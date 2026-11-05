@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Hỗ trợ sinh viên | Library Admin</title>
+    <link rel="stylesheet" th:href="@{/css/library.css}">
+</head>
+<body>
+<div th:replace="~{fragments :: navbar}"></div>
+<main class="admin-dashboard-layout">
+    <aside class="admin-sidebar">
+        <a class="admin-nav-item" th:href="@{/admin/statistics}"><span>📈</span><span>Thống kê</span></a>
+        <a class="admin-nav-item" th:href="@{/admin/books}"><span>📖</span><span>Quản lý sách</span></a>
+        <a class="admin-nav-item" th:href="@{/tickets}"><span>📑</span><span>Quản lý mượn sách</span></a>
+        <a class="admin-nav-item" th:href="@{/readers}"><span>👤</span><span>Quản lý người dùng</span></a>
+        <a class="admin-nav-item active" th:href="@{/admin/support}"><span>💬</span><span>Hỗ trợ sinh viên</span></a>
+    </aside>
+    <section class="admin-main-panel support-admin-panel">
+        <div class="admin-panel-topbar support-admin-heading">
+            <div><span class="support-eyebrow">TRUNG TÂM HỖ TRỢ</span><h1>Phản hồi từ sinh viên</h1><p>Theo dõi và xử lý các yêu cầu gửi từ trang hỗ trợ.</p></div>
+            <a class="btn-table-revert" th:href="@{/contact}">Xem trang hỗ trợ ↗</a>
+        </div>
+        <div class="alert-notice alert-success" role="status" th:if="${successMessage}" th:text="${successMessage}"></div>
+        <div class="alert-notice alert-error" role="alert" th:if="${errorMessage}" th:text="${errorMessage}"></div>
+        <div class="support-summary-grid">
+            <article class="support-summary-card"><span class="support-summary-icon">📨</span><div><small>Tổng yêu cầu</small><strong th:text="${#lists.size(feedbackItems)}">0</strong></div></article>
+            <article class="support-summary-card support-summary-open"><span class="support-summary-icon">⏳</span><div><small>Chưa xử lý</small><strong th:text="${openFeedbackCount}">0</strong></div></article>
+            <article class="support-summary-card support-summary-done"><span class="support-summary-icon">✓</span><div><small>Đã xử lý</small><strong th:text="${resolvedFeedbackCount}">0</strong></div></article>
+        </div>
+        <div class="support-list-toolbar">
+            <div><h2>Hộp thư hỗ trợ</h2><p>Mới nhất được hiển thị trước</p></div>
+            <label class="support-search"><span aria-hidden="true">⌕</span><input id="feedbackSearch" type="search" placeholder="Tìm tên, email, nội dung..." oninput="filterFeedback()"></label>
+        </div>
+        <div class="support-feedback-list" id="feedbackList" th:if="${!#lists.isEmpty(feedbackItems)}">
+            <article class="support-feedback-card" th:each="feedback : ${feedbackItems}" th:attr="data-search=${#strings.toLowerCase(feedback.studentName + ' ' + feedback.email + ' ' + feedback.category + ' ' + feedback.message)}">
+                <div class="support-feedback-topline">
+                    <div class="support-sender"><span class="support-sender-avatar" th:text="${#strings.substring(feedback.studentName,0,1)}">A</span><div><h3 th:text="${feedback.studentName}">Tên sinh viên</h3><a th:href="|mailto:${feedback.email}|" th:text="${feedback.email}">student@phenikaa-uni.edu.vn</a></div></div>
+                    <div class="support-feedback-meta"><span class="support-category" th:text="${feedback.category}">Chủ đề</span><time th:text="${feedback.createdAtFormatted}">19/10/2026 10:30</time><span class="status-pill" th:classappend="${feedback.status == 'RESPONDED'} ? ' status-resolved' : ' status-new'" th:text="${feedback.statusLabel}">Đã tiếp nhận</span></div>
+                </div>
+                <p class="support-feedback-message" th:text="${feedback.message}">Nội dung phản hồi</p>
+                <div class="admin-reply-preview" th:if="${feedback.adminReply != null and !feedback.adminReply.isBlank()}"><strong>Phản hồi đã gửi</strong><p th:text="${feedback.adminReply}">Nội dung trả lời</p><small th:text="${feedback.repliedAtFormatted}">Thời gian phản hồi</small></div>
+                <div class="support-feedback-actions">
+                    <form class="admin-reply-form" th:if="${feedback.status != 'RESPONDED'}" th:action="@{/admin/support/{id}/reply(id=${feedback.id})}" method="post"><input type="hidden" name="csrfToken" th:value="${csrfToken}"><label th:for="|reply-${feedback.id}|">Trả lời sinh viên</label><textarea name="reply" th:id="|reply-${feedback.id}|" maxlength="3000" placeholder="Viết nội dung phản hồi sẽ hiển thị trong tài khoản sinh viên..." required></textarea><div class="admin-reply-form-bottom"><small>Nội dung sẽ xuất hiện trong mục Hỗ trợ của sinh viên.</small><button class="btn-support-resolve" type="submit">Gửi phản hồi ↗</button></div></form>
+                    <form class="admin-progress-form" th:if="${feedback.status == 'NEW'}" th:action="@{/admin/support/{id}/progress(id=${feedback.id})}" method="post"><input type="hidden" name="csrfToken" th:value="${csrfToken}"><button class="btn-table-revert" type="submit">Đánh dấu đang xử lý</button></form>
+                </div>
+            </article>
+            <p class="support-search-empty" id="feedbackSearchEmpty" hidden>Không tìm thấy phản hồi phù hợp.</p>
+        </div>
+        <div class="support-empty-state" th:if="${#lists.isEmpty(feedbackItems)}"><span>✉️</span><h3>Hộp thư đang trống</h3><p>Khi sinh viên gửi yêu cầu qua trang hỗ trợ, phản hồi sẽ xuất hiện tại đây.</p><a class="btn-nav-register" th:href="@{/contact}">Mở trang hỗ trợ</a></div>
+    </section>
+</main>
+<div th:replace="~{fragments :: footer}"></div>
+<script>
+function filterFeedback() {
+    const query = document.getElementById('feedbackSearch').value.trim().toLowerCase();
+    const cards = document.querySelectorAll('.support-feedback-card');
+    let visible = 0;
+    cards.forEach(card => {
+        const matches = (card.dataset.search || '').includes(query);
+        card.hidden = !matches;
+        if (matches) visible++;
+    });
+    const empty = document.getElementById('feedbackSearchEmpty');
+    if (empty) empty.hidden = visible > 0;
+}
+</script>
+</body>
+</html>

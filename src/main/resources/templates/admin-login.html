@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Đăng nhập quản trị | Thư viện sinh viên</title>
+    <link rel="stylesheet" th:href="@{/css/library.css}">
+</head>
+<body>
+<!-- Navbar -->
+<div th:replace="~{fragments :: navbar}"></div>
+
+<main style="min-height: calc(100vh - 350px); display: flex; align-items: center; justify-content: center; padding: 40px 20px;">
+    <div class="form-panel-card" style="width: 100%; max-width: 440px; margin: 0; box-shadow: 0 10px 30px rgba(0,0,0,0.06);">
+        <div style="text-align: center; margin-bottom: 24px;">
+            <img th:src="@{/images/logo-phenikaa.png}" alt="Đại học Phenikaa" style="width: 190px; height: 42px; object-fit: contain; margin-bottom: 12px;">
+            <h1 style="font-size: 22px; font-weight: 800; color: #0f172a;">Đăng nhập Quản trị</h1>
+            <p style="font-size: 13.5px; color: #64748b; margin-top: 4px;">Truy cập bảng điều khiển quản trị hệ thống thư viện</p>
+        </div>
+
+        <div class="alert-notice alert-error" th:if="${errorMessage}" th:text="${errorMessage}"></div>
+
+        <form th:action="@{/admin/login}" method="post">
+            <div class="form-group">
+                <label for="username">Tên tài khoản</label>
+                <input id="username" name="username" type="text" class="form-control-input" placeholder="24100072@st.phenikaa-uni.edu.vn" required autofocus autocomplete="username">
+            </div>
+
+            <div class="form-group">
+                <label for="password">Mật khẩu</label>
+                <input id="password" name="password" type="password" class="form-control-input" placeholder="••••••••" required autocomplete="current-password">
+            </div>
+
+            <button type="submit" class="btn-form-submit" style="background: var(--primary-caramel);">
+                Đăng nhập hệ thống →
+            </button>
+        </form>
+
+        
+    </div>
+</main>
+
+<!-- Footer -->
+<div th:replace="~{fragments :: footer}"></div>
+</body>
+</html>

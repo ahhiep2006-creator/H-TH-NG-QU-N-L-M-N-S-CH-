@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Quản lý yêu cầu mượn sách | Library Admin</title>
+    <link rel="stylesheet" th:href="@{/css/library.css}">
+</head>
+<body>
+<!-- Navbar -->
+<div th:replace="~{fragments :: navbar}"></div>
+
+<main class="admin-dashboard-layout">
+    <!-- Left Sidebar (Matching Image 5) -->
+    <aside class="admin-sidebar">
+        <a class="admin-nav-item" th:href="@{/admin/statistics}">
+            <span>📈</span>
+            <span>Thống kê</span>
+        </a>
+        <a class="admin-nav-item" th:href="@{/admin/books}">
+            <span>📖</span>
+            <span>Quản lý sách</span>
+        </a>
+        <a class="admin-nav-item active" th:href="@{/tickets}">
+            <span>📑</span>
+            <span>Quản lý mượn sách</span>
+        </a>
+        <a class="admin-nav-item" th:href="@{/readers}">
+            <span>💳</span>
+            <span>Quản lý cấp thẻ</span>
+        </a>
+        <a class="admin-nav-item" th:href="@{/readers}">
+            <span>👤</span>
+            <span>Quản lý người dùng</span>
+        </a>
+        <a class="admin-nav-item" th:href="@{/admin/support}"><span>💬</span><span>Hỗ trợ sinh viên</span></a>
+    </aside>
+
+    <!-- Main Panel (Matching Image 5) -->
+    <section class="admin-main-panel">
+        <!-- Top bar with title and search/filter -->
+        <div class="admin-panel-topbar">
+            <h1>Quản lý yêu cầu mượn sách</h1>
+
+            <div class="admin-filter-bar">
+                <div class="admin-search-input-wrap">
+                    <input class="admin-search-input" type="text" id="ticketSearchInput"
+                           placeholder="Tìm mã, người mượn, sách..." onkeyup="filterTicketsTable()">
+                    <button class="admin-search-btn" type="button">🔍</button>
+                </div>
+
+                <div class="admin-sort-wrap">
+                    <span>Sắp xếp ngày mượn:</span>
+                    <select class="admin-sort-select">
+                        <option value="newest" selected>Mới nhất</option>
+                        <option value="oldest">Cũ nhất</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Success & Error Messages -->
+        <div class="alert-notice alert-success" role="status" th:if="${successMessage}" th:text="${successMessage}"></div>
+        <div class="alert-notice alert-error" role="alert" th:if="${errorMessage}" th:text="${errorMessage}"></div>
+
+        <!-- Admin Tickets Table (Image 5) -->
+        <div class="admin-table-container">
+            <table class="admin-tickets-table" id="adminTicketsTable">
+                <thead>
+                <tr>
+                    <th>ID Yêu cầu</th>
+                    <th>Người mượn</th>
+                    <th>Ảnh</th>
+                    <th>Tên sách</th>
+                    <th>Số lượng</th>
+                    <th>Ngày mượn ⇕</th>
+                    <th>Ngày trả</th>
+                    <th>Trạng thái</th>
+                    <th>Hành động</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="t : ${tickets}">
+                    <!-- ID Yêu cầu -->
+                    <td><strong th:text="${t.id}">6cea057a-4</strong></td>
+
+                    <!-- Người mượn -->
+                    <td>
+                        <span th:text="${t.readerName}">Nguyen Van A</span>
+                    </td>
+
+                    <!-- Ảnh bìa sách -->
+                    <td>
+                        <img class="ticket-thumb-img" th:src="@{${t.bookImageUrl}}" th:alt="${t.bookTitle}">
+                    </td>
+
+                    <!-- Tên sách -->
+                    <td style="max-width:220px; font-weight:600;" th:text="${t.bookTitle}">
+                        Phong Cách Lãnh Đạo Châu Á
+                    </td>
+
+                    <!-- Số lượng -->
+                    <td style="text-align:center;" th:text="${t.quantity}">1</td>
+
+                    <!-- Ngày mượn -->
+                    <td th:text="${t.borrowDateFormatted}">21/06/2026</td>
+
+                    <!-- Ngày trả -->
+                    <td th:text="${t.dueDateFormatted}">30/06/2026</td>
+
+                    <!-- Trạng thái -->
+                    <td>
+                        <span class="status-pill"
+                              th:classappend="${t.statusClass}"
+                              th:text="${t.statusLabel}">Chờ lấy sách</span>
+                    </td>
+
+                    <!-- Hành động (Matching Image 5) -->
+                    <td>
+                        <!-- 1. Trạng thái: Chờ lấy sách -> Nút "Xác nhận đã lấy" -->
+                        <form th:if="${(t.status == 'WAITING_PICKUP' or t.status == 'PENDING') and session.adminLoggedIn}"
+                              th:action="@{/tickets/pickup}" method="post" style="display:inline;">
+                            <input type="hidden" name="ticketId" th:value="${t.id}">
+                            <input type="hidden" name="csrfToken" th:value="${csrfToken}">
+                            <button class="btn-table-pickup" type="submit">Xác nhận đã lấy</button>
+                        </form>
+
+                        <!-- 2. Trạng thái: Đang mượn / Đã lấy sách -> Hoàn tác + Chưa trả + Nút "Xác nhận trả sách" -->
+                        <div th:if="${t.status == 'BORROWING' and session.adminLoggedIn}" style="display:inline-flex; align-items:center; gap:6px;">
+                            <form th:action="@{/tickets/revert}" method="post" style="display:inline;">
+                                <input type="hidden" name="ticketId" th:value="${t.id}">
+                                <input type="hidden" name="csrfToken" th:value="${csrfToken}">
+                                <button class="btn-table-revert" type="submit" title="Hoàn tác về chờ lấy sách">Hoàn tác</button>
+                            </form>
+                            <span class="txt-not-returned">Chưa trả</span>
+                            <form th:action="@{/tickets/return}" method="post" style="display:inline;">
+                                <input type="hidden" name="ticketId" th:value="${t.id}">
+                                <input type="hidden" name="csrfToken" th:value="${csrfToken}">
+                                <button class="btn-table-return" type="submit">Xác nhận trả sách</button>
+                            </form>
+                        </div>
+
+                        <!-- 3. Trạng thái: Đã trả -> Chữ "Đã trả" -->
+                        <span th:if="${t.status == 'RETURNED'}" class="txt-done">Đã trả</span>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div style="margin-top:20px; display:flex; justify-content:space-between; align-items:center;">
+            <a class="btn-nav-register" style="font-size:13px; padding:8px 20px;" th:href="@{/borrow}">＋ Tạo phiếu mượn mới</a>
+            <span style="font-size:13px; color:#64748b;" th:text="'Tổng số: ' + ${#lists.size(tickets)} + ' yêu cầu'">Tổng số: 4 yêu cầu</span>
+        </div>
+    </section>
+</main>
+
+<!-- Footer -->
+<div th:replace="~{fragments :: footer}"></div>
+
+<!-- Live search table script -->
+<script>
+function filterTicketsTable() {
+    const input = document.getElementById("ticketSearchInput");
+    const filter = input.value.toUpperCase();
+    const table = document.getElementById("adminTicketsTable");
+    const tr = table.getElementsByTagName("tr");
+
+    for (let i = 1; i < tr.length; i++) {
+        let textContent = tr[i].textContent || tr[i].innerText;
+        if (textContent.toUpperCase().indexOf(filter) > -1) {
+            tr[i].style.display = "";
+        } else {
+            tr[i].style.display = "none";
+        }
+    }
+}
+</script>
+
+</body>
+</html>

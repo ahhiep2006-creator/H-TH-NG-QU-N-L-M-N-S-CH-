@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Kho sách | Thư viện sinh viên</title>
+    <link rel="stylesheet" th:href="@{/css/library.css}">
+</head>
+<body>
+<!-- Navbar -->
+<div th:replace="~{fragments :: navbar}"></div>
+
+<main class="books-container">
+    <!-- Page Header & Filter Toolbar -->
+    <div class="page-title-banner">
+        <div class="banner-heading-wrap">
+            <h1>Kho sách thư viện</h1>
+            <p>Tra cứu theo tên sách, tác giả hoặc nhà xuất bản trong bộ sưu tập.</p>
+        </div>
+        <div class="toolbar-actions">
+            <a class="btn-csv-export" th:href="@{/books/export}">↓ Tải danh mục CSV</a>
+            <a class="btn-card-borrow" style="width:auto; padding:8px 18px;" th:if="${session.adminLoggedIn}" th:href="@{/admin/books}">＋ Thêm sách mới</a>
+        </div>
+    </div>
+
+    <!-- Active filter alert if searched -->
+    <div class="alert-notice alert-success" th:if="${keyword != null and !keyword.trim().isEmpty()}" style="margin-bottom:20px;">
+        <span>Kết quả tìm kiếm cho: "<strong th:text="${keyword}">từ khóa</strong>"</span>
+        <a th:href="@{/books}" style="margin-left:14px; text-decoration:underline;">Xóa bộ lọc</a>
+    </div>
+
+    <!-- Book Grid (Image 1) -->
+    <section class="book-catalog-grid" th:if="${!#lists.isEmpty(books)}">
+        <article class="book-card-item" th:each="book : ${books}">
+            <!-- Cover -->
+            <div class="book-cover-area">
+                <img class="book-cover-img" th:src="@{${book.imageUrl}}" th:alt="${book.title}">
+            </div>
+
+            <!-- Title -->
+            <h3 class="book-card-title" th:text="${book.title}">Tên sách</h3>
+
+            <!-- Metadata pills -->
+            <div class="book-card-pills">
+                <!-- Author -->
+                <div class="card-pill-box">
+                    <span aria-hidden="true">👤</span>
+                    <span th:text="${book.author}">Tác giả</span>
+                </div>
+
+                <!-- Publisher -->
+                <div class="card-pill-box">
+                    <span aria-hidden="true">🏢</span>
+                    <span th:text="${book.publisher}">Nhà xuất bản</span>
+                </div>
+
+                <!-- Pages & Year (2 cols) -->
+                <div class="card-pill-row-2col">
+                    <div class="card-pill-box">
+                        <span aria-hidden="true">📗</span>
+                        <span th:text="${book.pages} + ' trang'">205 trang</span>
+                    </div>
+                    <div class="card-pill-box">
+                        <span aria-hidden="true">📅</span>
+                        <span th:text="${book.publishYear}">2021</span>
+                    </div>
+                </div>
+
+                <!-- Language -->
+                <div class="card-pill-box">
+                    <span aria-hidden="true">🌐</span>
+                    <span th:text="${book.language}">Tiếng Việt</span>
+                </div>
+            </div>
+
+            <!-- Bottom Status Tags -->
+            <div class="card-bottom-tags">
+                <span class="tag-cover-soft"
+                      th:classappend="${book.coverType == 'Bìa cứng'} ? 'tag-soft-blue' : 'tag-soft-orange'"
+                      th:text="${book.coverType}">Bìa mềm</span>
+
+                <span class="tag-stock-green">
+                    <span aria-hidden="true">📚</span>
+                    <span th:text="'Còn ' + ${book.quantity} + ' quyển'">Còn 11 quyển</span>
+                </span>
+            </div>
+
+            <!-- Blue Action Button -->
+            <a class="btn-card-borrow" th:href="@{/borrow(bookId=${book.id})}">
+                <span>Mượn sách ngay</span>
+                <span aria-hidden="true">→</span>
+            </a>
+        </article>
+    </section>
+
+    <!-- Empty State -->
+    <div class="form-panel-card" style="text-align:center; padding:48px;" th:if="${#lists.isEmpty(books)}">
+        <span style="font-size:48px; display:block; margin-bottom:12px;">🔍</span>
+        <h2>Không tìm thấy cuốn sách phù hợp</h2>
+        <p style="color:#64748b; margin-bottom:20px;">Vui lòng thử tìm với từ khóa khác hoặc quay lại xem toàn bộ kho sách.</p>
+        <a class="btn-nav-register" style="display:inline-block;" th:href="@{/books}">Xem toàn bộ sách</a>
+    </div>
+</main>
+
+<!-- Footer -->
+<div th:replace="~{fragments :: footer}"></div>
+</body>
+</html>

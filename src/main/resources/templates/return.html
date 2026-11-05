@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Trả sách | Thư viện sinh viên</title>
+    <link rel="stylesheet" th:href="@{/css/library.css}">
+</head>
+<body>
+<div th:replace="~{fragments :: navbar}"></div>
+<main class="container">
+    <section class="page-banner">
+        <span class="eyebrow">Hoàn tất lượt đọc</span>
+        <h1 class="page-title">Trả sách</h1>
+        <p class="muted">Nhập mã phiếu đang mượn để cập nhật ngày trả và tính phí quá hạn nếu có.</p>
+    </section>
+
+    <div class="notice success" role="status" th:if="${successMessage}" th:text="${successMessage}"></div>
+    <div class="notice error" role="alert" th:if="${errorMessage}" th:text="${errorMessage}"></div>
+
+    <section class="form-layout">
+        <form class="panel form-main" th:action="@{/return}" method="post">
+            <h2>Thông tin phiếu trả</h2>
+            <p class="form-intro">Dùng đúng mã phiếu được cấp khi mượn sách.</p>
+            <div class="form-field">
+                <label for="ticketId">Mã phiếu mượn *</label>
+                <input id="ticketId" type="text" name="ticketId"
+                       placeholder="Ví dụ: mã phiếu trên danh sách" required>
+            </div>
+            <button type="submit">Xác nhận trả sách <span aria-hidden="true">→</span></button>
+        </form>
+        <aside class="aside-card">
+            <span class="eyebrow">Lưu ý</span>
+            <h3>Trả đúng hạn, thêm niềm vui</h3>
+            <p>Sách sẽ được cập nhật lại vào kho ngay khi phiếu trả hợp lệ.</p>
+            <p>Nếu trả sau ngày hẹn, hệ thống tự tính phí phạt theo chính sách của thư viện.</p>
+            <a class="text-link" th:href="@{/tickets}">Xem danh sách phiếu →</a>
+        </aside>
+    </section>
+</main>
+<div th:replace="~{fragments :: footer}"></div>
+</body>
+</html>

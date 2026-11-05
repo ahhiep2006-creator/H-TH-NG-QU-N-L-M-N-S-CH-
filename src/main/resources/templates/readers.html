@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Quản lý người dùng | Library Admin</title>
+    <link rel="stylesheet" th:href="@{/css/library.css}">
+</head>
+<body>
+<!-- Navbar -->
+<div th:replace="~{fragments :: navbar}"></div>
+
+<main class="admin-dashboard-layout">
+    <!-- Left Sidebar -->
+    <aside class="admin-sidebar">
+        <a class="admin-nav-item" th:href="@{/admin/statistics}">
+            <span>📈</span>
+            <span>Thống kê</span>
+        </a>
+        <a class="admin-nav-item" th:href="@{/admin/books}">
+            <span>📖</span>
+            <span>Quản lý sách</span>
+        </a>
+        <a class="admin-nav-item" th:href="@{/tickets}">
+            <span>📑</span>
+            <span>Quản lý mượn sách</span>
+        </a>
+        <a class="admin-nav-item" th:href="@{/profile}">
+            <span>💳</span>
+            <span>Thông tin cá nhân</span>
+        </a>
+        <a class="admin-nav-item active" th:href="@{/readers}">
+            <span>👤</span>
+            <span>Quản lý người dùng</span>
+        </a>
+        <a class="admin-nav-item" th:href="@{/admin/support}"><span>💬</span><span>Hỗ trợ sinh viên</span></a>
+    </aside>
+
+    <!-- Main Table Panel -->
+    <section class="admin-main-panel">
+        <div class="admin-panel-topbar">
+            <h1>Danh sách độc giả &amp; Bạn đọc thư viện</h1>
+            <div class="admin-sort-wrap">
+                <a class="btn-nav-register" style="font-size:13px; padding:8px 18px;" th:href="@{/profile}">Xem thẻ cá nhân →</a>
+            </div>
+        </div>
+
+        <div class="admin-table-container" th:if="${!#lists.isEmpty(readers)}">
+            <table class="admin-tickets-table">
+                <thead>
+                <tr>
+                    <th>Mã bạn đọc</th>
+                    <th>Họ và tên</th>
+                    <th>Email</th>
+                    <th>Số điện thoại</th>
+                    <th>Loại bạn đọc</th>
+                    <th>Hạn mức mượn</th>
+                    <th>Thao tác</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="reader : ${readers}">
+                    <td><strong th:text="${reader.id}">RD001</strong></td>
+                    <td style="font-weight:600;" th:text="${reader.fullName}">Nguyễn Văn An</td>
+                    <td style="color:#64748b;" th:text="${reader.email}">nam@dau.edu.vn</td>
+                    <td th:text="${reader.phone}">0901234567</td>
+                    <td>
+                        <span class="status-pill status-borrowing" th:text="${reader.readerTypeLabel}">Sinh viên thường</span>
+                    </td>
+                    <td>
+                        <span class="tag-stock-green" th:text="${reader.maxBorrowQuantity} + ' cuốn'">3 cuốn</span>
+                    </td>
+                    <td>
+                        <a class="btn-table-pickup" style="text-decoration:none; display:inline-block;"
+                           th:href="@{/borrow}">Mượn sách</a>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+</main>
+
+<!-- Footer -->
+<div th:replace="~{fragments :: footer}"></div>
+</body>
+</html>

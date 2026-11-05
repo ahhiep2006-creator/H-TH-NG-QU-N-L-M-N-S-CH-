@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Thư viện sinh viên | Mượn sách trực tuyến</title>
+    <link rel="stylesheet" th:href="@{/css/library.css}">
+</head>
+<body>
+<!-- Navbar -->
+<div th:replace="~{fragments :: navbar}"></div>
+
+<main>
+    <!-- ==================== HERO BANNER (Image 2) ==================== -->
+    <section class="hero-banner-section">
+        <div class="hero-tag-pill">
+            <span class="hero-dot-green"></span>
+            <span>TIỆN LỢI - NHANH CHÓNG</span>
+        </div>
+        <h1 class="hero-title">
+            Mượn sách trực<br>tuyến
+        </h1>
+        <p class="hero-subtitle">
+            Đặt giữ sách online, nhận tại thư viện. Quản lý mượn trả dễ dàng qua tài khoản cá nhân.
+        </p>
+        <a class="hero-cta-btn" th:href="@{/books}">
+            <span>Đăng ký ngay</span>
+            <span aria-hidden="true">→</span>
+        </a>
+
+        <!-- Carousel Dots -->
+        <div class="hero-carousel-dots">
+            <span class="hero-dot active"></span>
+            <span class="hero-dot"></span>
+            <span class="hero-dot"></span>
+        </div>
+    </section>
+
+    <!-- ==================== SÁCH MƯỢN NỔI BẬT TRONG THÁNG (Image 3) ==================== -->
+    <section class="featured-month-section">
+        <div class="featured-header">
+            <h2 class="featured-title-star">
+                <span style="color:#f59e0b;">⭐</span>
+                <span>SÁCH MƯỢN NỔI BẬT TRONG THÁNG</span>
+                <span style="color:#f59e0b;">⭐</span>
+            </h2>
+            <p class="featured-subtitle">
+                Khám phá những tựa sách được độc giả yêu thích và mượn nhiều nhất trong tháng qua.
+            </p>
+        </div>
+
+        <div class="featured-master-detail">
+            <!-- Left Ranked List -->
+            <div class="top-books-ranked-list">
+                <div class="ranked-book-item"
+                     th:each="book, iter : ${featuredBooks}"
+                     th:classappend="${iter.index == 0} ? ' active' : ''"
+                     th:attr="data-id=${book.id},
+                              data-title=${book.title},
+                              data-author=${book.author},
+                              data-publisher=${book.publisher},
+                              data-pages=${book.pages},
+                              data-year=${book.publishYear},
+                              data-cover=${book.coverType},
+                              data-qty=${book.quantity},
+                              data-img=${book.imageUrl},
+                              data-summary=${book.summary},
+                              data-rank=${iter.index + 1},
+                              data-borrows=${book.borrowCount}"
+                     onclick="selectFeaturedBook(this)">
+
+                    <span class="rank-badge-number"
+                          th:classappend="'rank-' + (${iter.index + 1})"
+                          th:text="${iter.index + 1}">1</span>
+
+                    <img class="ranked-thumb-img" th:src="@{${book.imageUrl}}" th:alt="${book.title}">
+
+                    <div class="ranked-item-info">
+                        <span class="ranked-item-title" th:text="${book.title}">Tên sách</span>
+                        <span class="ranked-item-author">
+                            <span aria-hidden="true">👤</span>
+                            <span th:text="${book.author}">Tác giả</span>
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Spotlight Detail Card -->
+            <article class="spotlight-card" id="spotlightDetailCard">
+                <div class="spotlight-top-tags">
+                    <span class="pill-tag-gold" id="spotlightRankTag">⭐ SÁCH NỔI BẬT SỐ 1</span>
+                    <span class="pill-tag-red" id="spotlightBorrowTag"
+                          th:text="'🔥 ' + (${spotlightBook != null ? spotlightBook.borrowCount : 10}) + ' lượt mượn'">🔥 10 lượt mượn</span>
+                </div>
+
+                <h3 class="spotlight-title" id="spotlightTitle"
+                    th:text="${spotlightBook != null ? spotlightBook.title : 'Phong Cách Lãnh Đạo Châu Á'}">
+                    Phong Cách Lãnh Đạo Châu Á
+                </h3>
+
+                <div class="spotlight-body">
+                    <!-- Cover wrap -->
+                    <div class="spotlight-cover-wrap">
+                        <div class="spotlight-cover-container">
+                            <img class="spotlight-cover-img" id="spotlightImage"
+                                 th:src="@{${spotlightBook != null ? spotlightBook.imageUrl : '/images/books/lanh-dao-chau-a.svg'}}"
+                                 th:alt="${spotlightBook != null ? spotlightBook.title : 'Sách nổi bật'}">
+                            <div class="spotlight-cover-overlay">Xem chi tiết →</div>
+                        </div>
+                        <div class="spotlight-cover-badges">
+                            <span class="badge-cover-type" id="spotlightCoverType"
+                                  th:text="${spotlightBook != null ? spotlightBook.coverType : 'Bìa mềm'}">Bìa mềm</span>
+                            <span class="badge-stock-qty" id="spotlightStockQty"
+                                  th:text="'Còn ' + (${spotlightBook != null ? spotlightBook.quantity : 4}) + ' quyển'">Còn 4 quyển</span>
+                        </div>
+                    </div>
+
+                    <!-- Meta info & summary -->
+                    <div>
+                        <div class="spotlight-meta-grid">
+                            <div class="meta-grid-item">
+                                <span class="meta-item-icon">👤</span>
+                                <div class="meta-item-labels">
+                                    <span class="meta-label-sub">TÁC GIẢ / NXB</span>
+                                    <span class="meta-label-value" id="spotlightAuthor"
+                                          th:text="${spotlightBook != null ? spotlightBook.author : 'Thế Giới'}">Thế Giới</span>
+                                </div>
+                            </div>
+                            <div class="meta-grid-item">
+                                <span class="meta-item-icon">📗</span>
+                                <div class="meta-item-labels">
+                                    <span class="meta-label-sub">SỐ TRANG</span>
+                                    <span class="meta-label-value" id="spotlightPages"
+                                          th:text="(${spotlightBook != null ? spotlightBook.pages : 215}) + ' trang'">215 trang</span>
+                                </div>
+                            </div>
+                            <div class="meta-grid-item">
+                                <span class="meta-item-icon">🏢</span>
+                                <div class="meta-item-labels">
+                                    <span class="meta-label-sub">PHÁT HÀNH</span>
+                                    <span class="meta-label-value" id="spotlightPublisher"
+                                          th:text="${spotlightBook != null ? spotlightBook.publisher : 'Cty Bán Lẻ Phương Nam'}">Cty Bán Lẻ Phương Nam</span>
+                                </div>
+                            </div>
+                            <div class="meta-grid-item">
+                                <span class="meta-item-icon">📅</span>
+                                <div class="meta-item-labels">
+                                    <span class="meta-label-sub">NĂM XB</span>
+                                    <span class="meta-label-value" id="spotlightYear"
+                                          th:text="${spotlightBook != null ? spotlightBook.publishYear : 2023}">2023</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Summary -->
+                        <div class="spotlight-summary-box">
+                            <div class="summary-heading">
+                                <span>📄</span>
+                                <span>Mô tả tóm tắt:</span>
+                            </div>
+                            <p class="summary-text" id="spotlightSummary"
+                               th:text="${spotlightBook != null ? spotlightBook.summary : 'Phong Cách Lãnh Đạo Châu Á Bí mật thành công và những góc khuất cuộc đời của 28 nhà lãnh đạo tài năng hàng đầu châu lục Phong cách lãnh đạo châu Á là một cái nhìn sâu sắc về các vấn đề lãnh đạo từ góc nhìn của 28 nhân vật xuất sắc...'}">
+                                Phong Cách Lãnh Đạo Châu Á Bí mật thành công và những góc khuất cuộc đời của 28 nhà lãnh đạo tài năng hàng đầu châu lục Phong cách lãnh đạo châu Á là một cái nhìn sâu sắc về các vấn đề lãnh đạo từ góc nhìn của 28 nhân vật xuất sắc...
+                            </p>
+                        </div>
+
+                        <a id="spotlightBorrowLink" class="spotlight-borrow-cta"
+                           th:href="@{/borrow(bookId=${spotlightBook != null ? spotlightBook.id : 'BK002'})}">
+                            <span>Mượn sách ngay</span>
+                            <span aria-hidden="true">→</span>
+                        </a>
+                    </div>
+                </div>
+            </article>
+        </div>
+    </section>
+
+    <!-- ==================== DANH MỤC SÁCH GRID PREVIEW (Image 1) ==================== -->
+    <section class="books-container">
+        <div class="page-title-banner">
+            <div class="banner-heading-wrap">
+                <h1>Kho sách thư viện</h1>
+                <p>Khám phá bộ sưu tập tài liệu, giáo trình và sách tham khảo mới nhất.</p>
+            </div>
+            <div class="toolbar-actions">
+                <a class="btn-csv-export" th:href="@{/books/export}">↓ Tải danh mục CSV</a>
+                <a class="btn-card-borrow" style="width:auto; padding:8px 18px;" th:href="@{/books}">Xem tất cả →</a>
+            </div>
+        </div>
+
+        <div class="book-catalog-grid">
+            <article class="book-card-item" th:each="book : ${books}">
+                <!-- Cover -->
+                <div class="book-cover-area">
+                    <img class="book-cover-img" th:src="@{${book.imageUrl}}" th:alt="${book.title}">
+                </div>
+
+                <!-- Title -->
+                <h3 class="book-card-title" th:text="${book.title}">Tên sách</h3>
+
+                <!-- Metadata pills -->
+                <div class="book-card-pills">
+                    <!-- Author pill -->
+                    <div class="card-pill-box">
+                        <span aria-hidden="true">👤</span>
+                        <span th:text="${book.author}">Tác giả</span>
+                    </div>
+
+                    <!-- Publisher pill -->
+                    <div class="card-pill-box">
+                        <span aria-hidden="true">🏢</span>
+                        <span th:text="${book.publisher}">Nhà xuất bản</span>
+                    </div>
+
+                    <!-- Pages & Year (2 cols) -->
+                    <div class="card-pill-row-2col">
+                        <div class="card-pill-box">
+                            <span aria-hidden="true">📗</span>
+                            <span th:text="${book.pages} + ' trang'">200 trang</span>
+                        </div>
+                        <div class="card-pill-box">
+                            <span aria-hidden="true">📅</span>
+                            <span th:text="${book.publishYear}">2023</span>
+                        </div>
+                    </div>
+
+                    <!-- Language -->
+                    <div class="card-pill-box">
+                        <span aria-hidden="true">🌐</span>
+                        <span th:text="${book.language}">Tiếng Việt</span>
+                    </div>
+                </div>
+
+                <!-- Bottom tags -->
+                <div class="card-bottom-tags">
+                    <span class="tag-cover-soft"
+                          th:classappend="${book.coverType == 'Bìa cứng'} ? 'tag-soft-blue' : 'tag-soft-orange'"
+                          th:text="${book.coverType}">Bìa mềm</span>
+
+                    <span class="tag-stock-green">
+                        <span aria-hidden="true">📚</span>
+                        <span th:text="'Còn ' + ${book.quantity} + ' quyển'">Còn 10 quyển</span>
+                    </span>
+                </div>
+
+                <!-- Blue Action Button -->
+                <a class="btn-card-borrow" th:href="@{/borrow(bookId=${book.id})}">
+                    <span>Mượn sách ngay</span>
+                    <span aria-hidden="true">→</span>
+                </a>
+            </article>
+        </div>
+    </section>
+</main>
+
+<!-- Footer -->
+<div th:replace="~{fragments :: footer}"></div>
+
+<!-- Interactive JS to switch Spotlight Book on click -->
+<script>
+function selectFeaturedBook(element) {
+    document.querySelectorAll('.ranked-book-item').forEach(el => el.classList.remove('active'));
+    element.classList.add('active');
+
+    const title = element.getAttribute('data-title');
+    const author = element.getAttribute('data-author');
+    const publisher = element.getAttribute('data-publisher');
+    const pages = element.getAttribute('data-pages');
+    const year = element.getAttribute('data-year');
+    const cover = element.getAttribute('data-cover');
+    const qty = element.getAttribute('data-qty');
+    const img = element.getAttribute('data-img');
+    const summary = element.getAttribute('data-summary');
+    const rank = element.getAttribute('data-rank');
+    const borrows = element.getAttribute('data-borrows');
+    const id = element.getAttribute('data-id');
+
+    document.getElementById('spotlightTitle').textContent = title;
+    document.getElementById('spotlightAuthor').textContent = author;
+    document.getElementById('spotlightPublisher').textContent = publisher;
+    document.getElementById('spotlightPages').textContent = pages + ' trang';
+    document.getElementById('spotlightYear').textContent = year;
+    document.getElementById('spotlightCoverType').textContent = cover;
+    document.getElementById('spotlightStockQty').textContent = 'Còn ' + qty + ' quyển';
+    document.getElementById('spotlightImage').src = img;
+    document.getElementById('spotlightSummary').textContent = summary;
+    document.getElementById('spotlightRankTag').textContent = '⭐ SÁCH NỔI BẬT SỐ ' + rank;
+    document.getElementById('spotlightBorrowTag').textContent = '🔥 ' + borrows + ' lượt mượn';
+    document.getElementById('spotlightBorrowLink').href = '/borrow?bookId=' + encodeURIComponent(id);
+}
+</script>
+
+</body>
+</html>

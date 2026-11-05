@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 420" fill="none">
+  <rect width="300" height="420" rx="6" fill="#ffffff"/>
+  <line x1="18" y1="0" x2="18" y2="420" stroke="#f1f5f9" stroke-width="2"/>
+
+  <!-- Author Top -->
+  <text x="150" y="38" font-family="'Segoe UI', Roboto, sans-serif" font-size="11" font-weight="700" fill="#64748b" text-anchor="middle">PHAN VĂN TRƯỜNG</text>
+
+  <!-- Title in Navy Bold -->
+  <text x="150" y="80" font-family="'Segoe UI', Roboto, sans-serif" font-size="18" font-weight="800" fill="#0284c7" text-anchor="middle">ĐI RA</text>
+  <text x="150" y="112" font-family="'Segoe UI', Roboto, sans-serif" font-size="26" font-weight="900" fill="#0369a1" text-anchor="middle">THẾ GIỚI,</text>
+  <text x="150" y="136" font-family="'Segoe UI', Roboto, sans-serif" font-size="14" font-weight="700" fill="#64748b" text-anchor="middle">VỚI</text>
+  <text x="150" y="165" font-family="'Segoe UI', Roboto, sans-serif" font-size="22" font-weight="900" fill="#0284c7" text-anchor="middle">NGƯỜI KHỔNG</text>
+  <text x="150" y="196" font-family="'Segoe UI', Roboto, sans-serif" font-size="28" font-weight="900" fill="#0369a1" text-anchor="middle">LỒ</text>
+
+  <!-- Subtitle -->
+  <text x="150" y="225" font-family="'Segoe UI', sans-serif" font-size="8.5" fill="#64748b" text-anchor="middle">LỐI ĐI NÀO VỀ TẬN HỢP ĐỒNG</text>
+  <text x="150" y="238" font-family="'Segoe UI', sans-serif" font-size="8.5" fill="#64748b" text-anchor="middle">HÀNG TỶ ĐÔ VỚI CÁC</text>
+  <text x="150" y="251" font-family="'Segoe UI', sans-serif" font-size="8.5" fill="#64748b" text-anchor="middle">THƯƠNG HIỆU TOÀN CẦU</text>
+
+  <!-- World Map graphic with pins -->
+  <g transform="translate(45, 275)">
+    <!-- Continents in cyan/blue -->
+    <path d="M10 20 Q30 5 45 25 Q35 45 15 40 Z" fill="#bae6fd"/>
+    <path d="M25 50 Q45 45 40 80 Q20 75 25 50 Z" fill="#bae6fd"/>
+    <path d="M75 15 Q100 10 110 35 Q85 45 75 15 Z" fill="#bae6fd"/>
+    <path d="M75 45 Q105 40 100 85 Q75 75 75 45 Z" fill="#bae6fd"/>
+    <path d="M115 15 Q170 10 195 40 Q150 70 120 40 Z" fill="#bae6fd"/>
+    <path d="M160 65 Q190 60 185 85 Q155 85 160 65 Z" fill="#bae6fd"/>
+
+    <!-- Map Red Pins -->
+    <g transform="translate(35, 28)">
+      <circle cx="0" cy="0" r="4.5" fill="#ef4444"/>
+      <circle cx="0" cy="0" r="2" fill="#ffffff"/>
+    </g>
+    <g transform="translate(90, 30)">
+      <circle cx="0" cy="0" r="4.5" fill="#ef4444"/>
+      <circle cx="0" cy="0" r="2" fill="#ffffff"/>
+    </g>
+    <g transform="translate(150, 42)">
+      <circle cx="0" cy="0" r="4.5" fill="#ef4444"/>
+      <circle cx="0" cy="0" r="2" fill="#ffffff"/>
+    </g>
+  </g>
+
+  <!-- Publisher logo bottom -->
+  <text x="150" y="395" font-family="'Segoe UI', sans-serif" font-size="9" font-weight="700" fill="#0369a1" text-anchor="middle">SkyBooks · THẾ GIỚI</text>
+</svg>

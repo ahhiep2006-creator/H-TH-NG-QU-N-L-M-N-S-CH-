@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Đề tài nhóm 04 | Quản lý mượn sách</title>
+    <style>
+        :root { color-scheme: light; --ink: #20342f; --muted: #62736d; --paper: #f3f4ed; --white: #fffefa; --green: #2f725c; --lime: #d7e78c; --coral: #c65e46; --line: #d9dfd4; }
+        * { box-sizing: border-box; }
+        html { scroll-behavior: smooth; scroll-snap-type: y mandatory; }
+        body { margin: 0; background: var(--paper); color: var(--ink); font-family: Georgia, "Times New Roman", serif; }
+        .slide { position: relative; display: flex; min-height: 100svh; flex-direction: column; justify-content: center; overflow: hidden; padding: 72px max(8vw, 28px) 90px; scroll-snap-align: start; border-bottom: 1px solid var(--line); }
+        .slide:nth-child(even) { background: var(--white); }
+        .slide::after { position: absolute; right: 7vw; bottom: -125px; width: 290px; height: 290px; border: 1px solid var(--line); border-radius: 50%; content: ""; }
+        .kicker { margin: 0 0 20px; color: var(--green); font: 700 13px/1.4 Arial, sans-serif; letter-spacing: 1px; text-transform: uppercase; }
+        h1, h2, h3, p { position: relative; z-index: 1; }
+        h1 { max-width: 900px; margin: 0; font-size: 64px; line-height: 1.03; }
+        h2 { max-width: 900px; margin: 0 0 34px; font-size: 42px; line-height: 1.08; }
+        h3 { margin: 0 0 10px; font-size: 21px; }
+        p, li { font-size: 19px; line-height: 1.55; }
+        .lead { max-width: 720px; margin: 24px 0 0; color: var(--muted); font-size: 22px; }
+        .cover { background: var(--green); color: var(--white); }
+        .cover .kicker, .cover .lead { color: #e2edca; }
+        .cover::after { right: 8vw; bottom: 11vh; width: 230px; height: 230px; border: 24px solid var(--lime); border-right-color: var(--coral); border-bottom-color: var(--white); }
+        .cover-tag { display: inline-block; margin-top: 40px; padding: 10px 14px; border: 1px solid rgba(255,255,255,.4); border-radius: 3px; font: 14px Arial, sans-serif; }
+        .grid { position: relative; z-index: 1; display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 16px; max-width: 980px; }
+        .panel { padding: 22px; border: 1px solid var(--line); border-radius: 5px; background: var(--white); }
+        .panel p { margin: 0; color: var(--muted); font-size: 16px; }
+        .tag { display: inline-block; margin-bottom: 12px; color: var(--coral); font: 700 12px Arial, sans-serif; text-transform: uppercase; }
+        .flow { position: relative; z-index: 1; display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 12px; max-width: 1000px; }
+        .step { min-height: 150px; padding: 20px; border-top: 4px solid var(--green); background: var(--white); }
+        .step b { display: block; margin-bottom: 14px; color: var(--coral); font: 700 13px Arial, sans-serif; }
+        .step span { font-size: 17px; line-height: 1.4; }
+        .rates { position: relative; z-index: 1; display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 14px; max-width: 920px; }
+        .rate { padding: 24px; background: var(--ink); color: var(--white); }
+        .rate strong { display: block; margin-top: 18px; color: var(--lime); font-size: 28px; }
+        .tree { position: relative; z-index: 1; display: grid; justify-items: center; gap: 10px; max-width: 850px; }
+        .node { padding: 12px 18px; border: 1px solid var(--green); background: var(--white); font: 700 15px Arial, sans-serif; }
+        .branches { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 12px; width: 100%; }
+        .branch { padding: 15px 10px; background: #e5edd8; text-align: center; font: 14px Arial, sans-serif; }
+        .slide-footer { position: absolute; right: max(8vw, 28px); bottom: 25px; left: max(8vw, 28px); z-index: 2; display: flex; justify-content: space-between; align-items: center; color: var(--muted); font: 12px Arial, sans-serif; }
+        .slide-footer a { padding: 7px 10px; border: 1px solid var(--line); border-radius: 3px; color: var(--green); text-decoration: none; }
+        .slide-footer a:hover { background: var(--lime); }
+        .cover .slide-footer { color: #e2edca; }
+        .cover .slide-footer a { border-color: rgba(255,255,255,.45); color: var(--white); }
+        @media (max-width: 700px) {
+            .slide { padding: 50px 24px 80px; }
+            h1 { font-size: 44px; }
+            h2 { font-size: 32px; }
+            p, li { font-size: 17px; }
+            .grid, .rates { grid-template-columns: 1fr; }
+            .flow { grid-template-columns: repeat(2,minmax(0,1fr)); }
+            .slide::after { right: -120px; }
+        }
+        @media print {
+            html { scroll-snap-type: none; }
+            .slide { min-height: 100vh; height: 100vh; break-after: page; page-break-after: always; }
+            .slide-footer a { display: none; }
+        }
+    </style>
+</head>
+<body>
+<section class="slide cover" id="slide-1">
+    <p class="kicker">Đề tài nhóm 04</p>
+    <h1>Hệ thống quản lý mượn sách thư viện sinh viên</h1>
+    <p class="lead">Từ kiểm tra tồn kho đến trả sách và tính phí quá hạn trong một quy trình thống nhất.</p>
+    <span class="cover-tag">Java 17 · Spring Boot · Spring Data JPA</span>
+    <nav class="slide-footer"><span>Nhóm 04 · Điền tên thành viên trước khi trình bày</span><a href="#slide-2">Tiếp theo →</a></nav>
+</section>
+<section class="slide" id="slide-2">
+    <p class="kicker">01 / Bối cảnh</p>
+    <h2>Vì sao cần hệ thống?</h2>
+    <div class="grid">
+        <article class="panel"><span class="tag">Vấn đề</span><h3>Quản lý thủ công dễ sai</h3><p>Ghi nhận trên bảng tính có thể dẫn đến vượt hạn mức, cho mượn khi hết sách hoặc bỏ sót khoản phạt.</p></article>
+        <article class="panel"><span class="tag">Mục tiêu</span><h3>Kiểm soát ngay tại nghiệp vụ</h3><p>Kiểm tra bạn đọc, số lượng, tồn kho và ngày hẹn trả trước khi hoàn tất mượn hoặc trả.</p></article>
+    </div>
+    <nav class="slide-footer"><a href="#slide-1">← Trước</a><span>Đề tài nhóm 04</span><a href="#slide-3">Tiếp theo →</a></nav>
+</section>
+<section class="slide" id="slide-3">
+    <p class="kicker">02 / Thiết kế hướng đối tượng</p>
+    <h2>Mô hình hóa đúng vai trò</h2>
+    <div class="tree">
+        <div class="node">User (abstract)</div><div class="node">Reader</div>
+        <div class="branches"><div class="branch">StudentReader<br>Tối đa 3 cuốn</div><div class="branch">PriorityStudentReader<br>Tối đa 5 cuốn</div><div class="branch">LecturerReader<br>Tối đa 10 cuốn</div></div>
+        <div class="grid" style="width:100%;margin-top:12px;">
+            <article class="panel"><h3>Borrowable</h3><p>Hợp đồng hành vi kiểm tra tồn kho, mượn và trả sách.</p></article>
+            <article class="panel"><h3>FinePolicy</h3><p>Cho phép thay đổi chính sách phạt độc lập với luồng trả sách.</p></article>
+        </div>
+    </div>
+    <nav class="slide-footer"><a href="#slide-2">← Trước</a><span>Kế thừa · Interface · Polymorphism</span><a href="#slide-4">Tiếp theo →</a></nav>
+</section>
+<section class="slide" id="slide-4">
+    <p class="kicker">03 / Quy trình mượn</p>
+    <h2>Chỉ tạo phiếu khi điều kiện hợp lệ</h2>
+    <div class="flow">
+        <div class="step"><b>01</b><span>Tìm bạn đọc và khóa bản ghi để cập nhật an toàn.</span></div>
+        <div class="step"><b>02</b><span>Kiểm tra sách, tồn kho và số lượng yêu cầu.</span></div>
+        <div class="step"><b>03</b><span>Cộng số đang mượn và đối chiếu hạn mức loại bạn đọc.</span></div>
+        <div class="step"><b>04</b><span>Tạo phiếu, hạn trả 14 ngày và trừ tồn kho trong transaction.</span></div>
+    </div>
+    <p class="lead">Lỗi nghiệp vụ có thông báo riêng; giao dịch không ghi nhận phiếu nếu kiểm tra thất bại.</p>
+    <nav class="slide-footer"><a href="#slide-3">← Trước</a><span>BorrowService</span><a href="#slide-5">Tiếp theo →</a></nav>
+</section>
+<section class="slide" id="slide-5">
+    <p class="kicker">04 / Quy trình trả</p>
+    <h2>Trả sách và tính phí theo chính sách</h2>
+    <div class="grid">
+        <article class="panel"><span class="tag">Thao tác</span><h3>Kiểm tra trạng thái phiếu</h3><p>Chỉ phiếu đang mượn mới được trả; ngày trả thực tế được lưu cùng bản ghi trả.</p></article>
+        <article class="panel"><span class="tag">Kết quả</span><h3>Khôi phục tồn kho</h3><p>Phiếu chuyển sang đã trả, số lượng sách được cộng lại và phí được tính nếu trễ hạn.</p></article>
+    </div>
+    <div class="rates" style="margin-top:18px;">
+        <div class="rate">Sinh viên thường<strong>5.000đ/ngày</strong></div>
+        <div class="rate">Sinh viên ưu tiên<strong>3.000đ/ngày</strong></div>
+        <div class="rate">Giảng viên<strong>2.000đ/ngày</strong></div>
+    </div>
+    <nav class="slide-footer"><a href="#slide-4">← Trước</a><span>ReturnRecord · FinePolicy</span><a href="#slide-6">Tiếp theo →</a></nav>
+</section>
+<section class="slide" id="slide-6">
+    <p class="kicker">05 / Kiến trúc và lưu trữ</p>
+    <h2>Phân lớp để dễ thay đổi</h2>
+    <div class="grid">
+        <article class="panel"><h3>Model &amp; Repository</h3><p>JPA ánh xạ sách, bạn đọc, phiếu mượn và bản ghi trả vào database.</p></article>
+        <article class="panel"><h3>Service</h3><p>BorrowService giữ nghiệp vụ; FinePolicy tách riêng cách tính phí.</p></article>
+        <article class="panel"><h3>Controller &amp; Thymeleaf</h3><p>Cung cấp trang web cho tra cứu, mượn, trả và quản trị.</p></article>
+        <article class="panel"><h3>File I/O</h3><p>Xuất danh mục sách ra CSV UTF-8 để tải xuống.</p></article>
+    </div>
+    <p class="lead">H2 được cấu hình mặc định cho demo; có profile MySQL riêng.</p>
+    <nav class="slide-footer"><a href="#slide-5">← Trước</a><span>Spring Boot · JPA · Thymeleaf</span><a href="#slide-7">Tiếp theo →</a></nav>
+</section>
+<section class="slide" id="slide-7">
+    <p class="kicker">06 / Kiểm thử</p>
+    <h2>Kiểm tra các nhánh nghiệp vụ quan trọng</h2>
+    <div class="grid">
+        <article class="panel"><span class="tag">Mượn</span><h3>Thành công và từ chối</h3><p>Mượn được sách còn tồn; từ chối hết sách, số lượng không hợp lệ và vượt hạn mức.</p></article>
+        <article class="panel"><span class="tag">Trả</span><h3>Phạt và trạng thái</h3><p>Kiểm tra trả quá hạn, chính sách ba loại bạn đọc, phiếu đã trả và chuyển trạng thái.</p></article>
+        <article class="panel"><span class="tag">Dữ liệu</span><h3>Xuất CSV</h3><p>Kiểm tra nội dung có dấu phẩy, dấu nháy và mã hóa UTF-8.</p></article>
+        <article class="panel"><span class="tag">Bổ sung</span><h3>Kiểm thử tích hợp</h3><p>Nên xác minh thêm luồng trả đúng hạn và các mã bạn đọc/sách/phiếu không tồn tại.</p></article>
+    </div>
+    <nav class="slide-footer"><a href="#slide-6">← Trước</a><span>Chi tiết trong test-scenarios.md</span><a href="#slide-8">Tiếp theo →</a></nav>
+</section>
+<section class="slide cover" id="slide-8">
+    <p class="kicker">Tổng kết</p>
+    <h2>Quản lý mượn trả minh bạch và nhất quán</h2>
+    <p class="lead">Nghiệp vụ được tách lớp, dữ liệu lưu trong database, các quy tắc quan trọng có kiểm thử tự động.</p>
+    <span class="cover-tag">Nhóm 04 · Bổ sung tên thành viên trước khi trình bày</span>
+    <nav class="slide-footer"><a href="#slide-7">← Trước</a><span>Hết trình chiếu</span><a href="#slide-1">Về đầu ↑</a></nav>
+</section>
+</body>
+</html>

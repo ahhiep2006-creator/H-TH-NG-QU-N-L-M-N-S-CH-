@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Thống kê mượn trả | Library Admin</title>
+    <link rel="stylesheet" th:href="@{/css/library.css}">
+</head>
+<body>
+<div th:replace="~{fragments :: navbar}"></div>
+<main class="admin-dashboard-layout">
+    <aside class="admin-sidebar">
+        <a class="admin-nav-item active" th:href="@{/admin/statistics}"><span>📈</span><span>Thống kê</span></a>
+        <a class="admin-nav-item" th:href="@{/admin/books}"><span>📖</span><span>Quản lý sách</span></a>
+        <a class="admin-nav-item" th:href="@{/tickets}"><span>📑</span><span>Quản lý mượn sách</span></a>
+        <a class="admin-nav-item" th:href="@{/readers}"><span>👤</span><span>Quản lý người dùng</span></a>
+        <a class="admin-nav-item" th:href="@{/admin/support}"><span>💬</span><span>Hỗ trợ sinh viên</span></a>
+    </aside>
+    <section class="admin-main-panel">
+        <div class="admin-panel-topbar">
+            <div>
+                <h1>Thống kê mượn trả sách</h1>
+                <p style="margin:6px 0 0;color:#77838b;font-size:13px;">Tình hình mượn trả và mức độ quan tâm theo từng đầu sách</p>
+            </div>
+        </div>
+
+        <section class="stats-summary-grid" aria-label="Tổng quan mượn trả">
+            <article class="stats-summary-card">
+                <span class="stats-summary-icon" aria-hidden="true">↗</span>
+                <div><small>Sách đang được mượn</small><strong th:text="${borrowingCount}">0</strong></div>
+            </article>
+            <article class="stats-summary-card">
+                <span class="stats-summary-icon" aria-hidden="true">✓</span>
+                <div><small>Phiếu đã trả</small><strong th:text="${returnedCount}">0</strong></div>
+            </article>
+            <article class="stats-summary-card">
+                <span class="stats-summary-icon" aria-hidden="true">▤</span>
+                <div><small>Lượt sách đã mượn</small><strong th:text="${totalBorrowedCopies}">0</strong></div>
+            </article>
+        </section>
+
+        <section class="stats-content-grid">
+            <article class="stats-panel">
+                <div class="stats-panel-heading">
+                    <h2>Tỷ lệ mượn và trả</h2>
+                    <p><span th:text="${totalTicketCount}">0</span> phiếu mượn trong hệ thống</p>
+                </div>
+                <div class="stats-status-layout">
+                    <div class="stats-donut" th:style="'--returned-ratio:' + ${returnedPercentage} + '%'" role="img" th:attr="aria-label=|${returnedPercentage}% phiếu đã trả|"></div>
+                    <div class="stats-status-legend">
+                        <div class="stats-legend-item"><span class="stats-legend-dot"></span><span>Đã trả</span><strong><span th:text="${returnedCount}">0</span> · <span th:text="${returnedPercentage}">0</span>%</strong></div>
+                        <div class="stats-legend-item"><span class="stats-legend-dot borrowing"></span><span>Đang mượn</span><strong><span th:text="${borrowingCount}">0</span> · <span th:text="${borrowingPercentage}">0</span>%</strong></div>
+                    </div>
+                </div>
+            </article>
+
+            <article class="stats-panel">
+                <div class="stats-panel-heading">
+                    <h2>Sách được mượn nhiều nhất</h2>
+                    <p>Xếp theo tổng số cuốn đã mượn, gồm cả sách chưa có lượt mượn</p>
+                </div>
+                <ol class="stats-book-list" th:if="${!#lists.isEmpty(bookStatistics)}">
+                    <li class="stats-book-item" th:each="stat : ${bookStatistics}">
+                        <span class="stats-book-title" th:text="${stat.book.title}" th:title="${stat.book.title}">Tên sách</span>
+                        <span class="stats-book-count"><span th:text="${stat.borrowCount}">0</span> lượt</span>
+                        <span class="stats-book-track"><span class="stats-book-fill" th:style="'width:' + ${stat.percent} + '%'" role="presentation"></span></span>
+                    </li>
+                </ol>
+                <p class="stats-book-empty" th:if="${#lists.isEmpty(bookStatistics)}">Chưa có sách để thống kê.</p>
+            </article>
+        </section>
+    </section>
+</main>
+</body>
+</html>

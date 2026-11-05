@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Quản lý &amp; Thêm sách mới | Library Admin</title>
+    <link rel="stylesheet" th:href="@{/css/library.css}">
+</head>
+<body>
+<!-- Navbar -->
+<div th:replace="~{fragments :: navbar}"></div>
+
+<main class="admin-dashboard-layout">
+    <!-- Left Sidebar (Matching Image 5) -->
+    <aside class="admin-sidebar">
+        <a class="admin-nav-item" th:href="@{/admin/statistics}">
+            <span>📈</span>
+            <span>Thống kê</span>
+        </a>
+        <a class="admin-nav-item active" th:href="@{/admin/books}">
+            <span>📖</span>
+            <span>Quản lý sách</span>
+        </a>
+        <a class="admin-nav-item" th:href="@{/tickets}">
+            <span>📑</span>
+            <span>Quản lý mượn sách</span>
+        </a>
+        <a class="admin-nav-item" th:href="@{/profile}">
+            <span>💳</span>
+            <span>Thông tin cá nhân</span>
+        </a>
+        <a class="admin-nav-item" th:href="@{/readers}">
+            <span>👤</span>
+            <span>Quản lý người dùng</span>
+        </a>
+        <a class="admin-nav-item" th:href="@{/admin/support}"><span>💬</span><span>Hỗ trợ sinh viên</span></a>
+    </aside>
+
+    <!-- Main Panel -->
+    <section class="admin-main-panel">
+        <div class="admin-panel-topbar">
+            <h1>Thêm đầu sách mới vào kho</h1>
+            <a class="btn-table-revert" th:href="@{/books}">← Xem danh mục sách</a>
+        </div>
+
+        <div class="alert-notice alert-success" th:if="${successMessage}" th:text="${successMessage}"></div>
+
+        <form th:action="@{/admin/books}" th:object="${bookForm}" method="post" style="max-width: 680px;">
+            <input type="hidden" name="csrfToken" th:value="${csrfToken}">
+
+            <div class="form-group">
+                <label for="id">Mã sách *</label>
+                <input id="id" type="text" class="form-control-input" th:field="*{id}" placeholder="VD: BK007" required maxlength="20">
+                <small style="color:#ef4444; font-size:12px;" th:if="${#fields.hasErrors('id')}" th:errors="*{id}"></small>
+            </div>
+
+            <div class="form-group">
+                <label for="title">Tên sách *</label>
+                <input id="title" type="text" class="form-control-input" th:field="*{title}" placeholder="Nhập tên đầu sách..." required maxlength="200">
+                <small style="color:#ef4444; font-size:12px;" th:if="${#fields.hasErrors('title')}" th:errors="*{title}"></small>
+            </div>
+
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+                <div class="form-group">
+                    <label for="author">Tác giả *</label>
+                    <input id="author" type="text" class="form-control-input" th:field="*{author}" placeholder="VD: Nguyễn Nhật Ánh" required maxlength="100">
+                    <small style="color:#ef4444; font-size:12px;" th:if="${#fields.hasErrors('author')}" th:errors="*{author}"></small>
+                </div>
+
+                <div class="form-group">
+                    <label for="category">Thể loại</label>
+                    <input id="category" type="text" class="form-control-input" th:field="*{category}" placeholder="VD: Văn học, Công nghệ..." maxlength="100">
+                </div>
+            </div>
+
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+                <div class="form-group">
+                    <label for="quantity">Số lượng nhập kho *</label>
+                    <input id="quantity" type="number" class="form-control-input" th:field="*{quantity}" required min="1" value="10">
+                    <small style="color:#ef4444; font-size:12px;" th:if="${#fields.hasErrors('quantity')}" th:errors="*{quantity}"></small>
+                </div>
+
+                <div class="form-group">
+                    <label for="value">Giá trị sách (VNĐ) *</label>
+                    <input id="value" type="number" class="form-control-input" th:field="*{value}" required min="0" step="1000" placeholder="VD: 120000">
+                    <small style="color:#ef4444; font-size:12px;" th:if="${#fields.hasErrors('value')}" th:errors="*{value}"></small>
+                </div>
+            </div>
+
+            <button type="submit" class="btn-card-borrow" style="width:100%; padding:12px; margin-top:14px; font-size:14.5px;">
+                ＋ Lưu sách vào hệ thống
+            </button>
+        </form>
+    </section>
+</main>
+
+<!-- Footer -->
+<div th:replace="~{fragments :: footer}"></div>
+</body>
+</html>

@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Thông tin cá nhân | Thư viện sinh viên</title>
+    <link rel="stylesheet" th:href="@{/css/library.css}">
+</head>
+<body>
+<!-- Navbar -->
+<div th:replace="~{fragments :: navbar}"></div>
+
+<main class="profile-page-layout">
+    <!-- Left Sidebar -->
+    <aside class="profile-sidebar">
+        <a class="profile-nav-link active" th:href="@{/profile}">
+            <span>👤</span>
+            <span>Thông tin cá nhân</span>
+        </a>
+        <a class="profile-nav-link" th:href="@{/tickets}">
+            <span>🕒</span>
+            <span>Lịch sử mượn sách</span>
+        </a>
+        <a class="profile-nav-link logout" th:href="@{/}">
+            <span>🚪</span>
+            <span>Đăng xuất</span>
+        </a>
+    </aside>
+
+    <!-- Right Main Panel -->
+    <section class="profile-main-panel">
+        <div class="profile-panel-header">
+            <h2>Thông tin cá nhân</h2>
+            <button class="btn-edit-profile" type="button">
+                <span>✏️</span>
+                <span>Chỉnh sửa</span>
+            </button>
+        </div>
+
+        <div class="profile-info-grid">
+            <!-- Large Avatar -->
+            <div class="profile-avatar-large">
+                <span>👤</span>
+            </div>
+
+            <!-- Details Table (Matching Image 4) -->
+            <table class="profile-table-details">
+                <tbody>
+                <tr>
+                    <td class="td-label">Họ và tên</td>
+                    <td class="td-value" th:text="${reader != null ? reader.fullName : 'Nguyen Van A'}">Nguyen Van A</td>
+                    <td class="td-label">Email</td>
+                    <td class="td-value" th:text="${reader != null ? reader.email : 'nam_2251220175@dau.edu.vn'}">nam_2251220175@dau.edu.vn</td>
+                    <td class="td-label">Số điện thoại</td>
+                    <td class="td-value" th:text="${reader != null ? reader.phone : '0367586982'}">0367586982</td>
+                </tr>
+                <tr>
+                    <td class="td-label">Địa chỉ</td>
+                    <td class="td-value" th:text="${reader != null ? reader.address : 'Tp Hue'}">Tp Hue</td>
+                    <td class="td-label">Mã sinh viên</td>
+                    <td class="td-value" th:text="${reader != null ? reader.studentCode : '2251220171'}">2251220171</td>
+                    <td class="td-label">Loại bạn đọc</td>
+                    <td class="td-value" th:text="${reader != null ? reader.readerTypeLabel : 'Sinh viên thường'}">Sinh viên thường</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+</main>
+
+<!-- Footer -->
+<div th:replace="~{fragments :: footer}"></div>
+</body>
+</html>

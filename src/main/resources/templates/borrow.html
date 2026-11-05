@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Mượn sách | Thư viện sinh viên</title>
+    <link rel="stylesheet" th:href="@{/css/library.css}">
+</head>
+<body>
+<!-- Navbar -->
+<div th:replace="~{fragments :: navbar}"></div>
+
+<main class="books-container" style="max-width:960px;">
+    <!-- Page Banner -->
+    <div class="page-title-banner" style="margin-bottom:28px;">
+        <div class="banner-heading-wrap">
+            <h1>Tạo phiếu mượn sách trực tuyến</h1>
+            <p>Chọn độc giả, cuốn sách cần mượn và số lượng mong muốn.</p>
+        </div>
+    </div>
+
+    <!-- Notices -->
+    <div class="alert-notice alert-success" role="status" th:if="${successMessage}" th:text="${successMessage}"></div>
+    <div class="alert-notice alert-error" role="alert" th:if="${errorMessage}" th:text="${errorMessage}"></div>
+
+    <div style="display:grid; grid-template-columns:1.6fr 1fr; gap:28px; align-items:start;">
+        <!-- Main Form Panel -->
+        <div class="form-panel-card" style="margin:0; max-width:none;">
+            <h2>Thông tin đăng ký mượn</h2>
+            <p style="color:#64748b; font-size:13.5px; margin-bottom:20px;">Hệ thống sẽ tự động kiểm tra tồn kho và hạn mức của độc giả.</p>
+
+            <form th:action="@{/borrow}" method="post">
+                <div class="form-group">
+                    <label for="readerId">Bạn đọc đăng ký *</label>
+                    <select id="readerId" name="readerId" class="form-control-select" required>
+                        <option value="">-- Chọn độc giả mượn sách --</option>
+                        <option th:each="reader : ${readers}"
+                                th:value="${reader.id}"
+                                th:text="${reader.id + ' · ' + reader.fullName + ' (' + reader.readerTypeLabel + ')'}">
+                            Bạn đọc
+                        </option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="bookId">Đầu sách muốn mượn *</label>
+                    <select id="bookId" name="bookId" class="form-control-select" required>
+                        <option value="">-- Chọn cuốn sách trong kho --</option>
+                        <option th:each="book : ${books}"
+                                th:if="${book.quantity > 0}"
+                                th:value="${book.id}"
+                                th:selected="${book.id == selectedBookId}"
+                                th:text="${book.title + ' · ' + book.author + ' (còn ' + book.quantity + ' cuốn)'}">
+                            Sách
+                        </option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="quantity">Số lượng mượn *</label>
+                    <input id="quantity" type="number" name="quantity" class="form-control-input" min="1" value="1" required>
+                    <span style="font-size:12px; color:#64748b; margin-top:4px; display:block;">Thời hạn mượn tiêu chuẩn là 14 ngày.</span>
+                </div>
+
+                <button class="btn-form-submit" type="submit">Xác nhận tạo phiếu mượn →</button>
+            </form>
+        </div>
+
+        <!-- Aside Info Card -->
+        <div class="profile-sidebar" style="padding:24px;">
+            <div style="display:flex; align-items:center; gap:8px; margin-bottom:12px;">
+                <span style="font-size:20px;">💡</span>
+                <h3 style="font-size:16px; font-weight:700; color:#0f172a;">Quy định mượn sách</h3>
+            </div>
+            <p style="font-size:13px; color:#64748b; line-height:1.6; margin-bottom:14px;">
+                Để đảm bảo công bằng cho mọi độc giả, thư viện áp dụng hạn mức mượn cụ thể:
+            </p>
+            <ul style="font-size:13px; color:#334155; line-height:1.8; padding-left:18px; margin-bottom:18px;">
+                <li><strong>Sinh viên thường:</strong> Tối đa 3 cuốn.</li>
+                <li><strong>Sinh viên ưu tiên:</strong> Tối đa 5 cuốn.</li>
+                <li><strong>Giảng viên:</strong> Tối đa 10 cuốn.</li>
+                <li>Trả trễ hạn sẽ áp dụng phí phạt theo ngày quá hạn.</li>
+            </ul>
+            <a class="btn-card-borrow" style="width:100%;" th:href="@{/tickets}">Xem danh sách phiếu mượn →</a>
+        </div>
+    </div>
+</main>
+
+<!-- Footer -->
+<div th:replace="~{fragments :: footer}"></div>
+</body>
+</html>

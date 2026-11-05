@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 420" fill="none">
+  <defs>
+    <filter id="shadow" x="-5%" y="-5%" width="110%" height="110%">
+      <feDropShadow dx="2" dy="4" stdDeviation="4" flood-opacity="0.15"/>
+    </filter>
+  </defs>
+  <rect width="300" height="420" rx="6" fill="#fdfdfd"/>
+  <!-- Book spine line -->
+  <line x1="18" y1="0" x2="18" y2="420" stroke="#f1f5f9" stroke-width="2"/>
+  
+  <!-- Authors Top -->
+  <text x="150" y="32" font-family="'Segoe UI', Roboto, sans-serif" font-size="9" font-weight="600" fill="#64748b" text-anchor="middle" letter-spacing="1">STEVE DILLER, NATHAN SHEDROFF, SEAN SAUBER</text>
+  
+  <!-- Title in Red Bold -->
+  <text x="150" y="80" font-family="'Segoe UI', Roboto, sans-serif" font-size="28" font-weight="800" fill="#dc2626" text-anchor="middle" letter-spacing="2">ĐIỂM MÙ</text>
+  <text x="150" y="105" font-family="'Segoe UI', Roboto, sans-serif" font-size="14" font-weight="700" fill="#1e293b" text-anchor="middle" letter-spacing="3">TRONG KINH DOANH</text>
+  
+  <!-- Central Abstract Eye / Target Icon -->
+  <g transform="translate(150, 220)">
+    <!-- Eye outline -->
+    <path d="M-55 0 C-30 -35 30 -35 55 0 C30 35 -30 35 -55 0 Z" fill="none" stroke="#e2e8f0" stroke-width="3"/>
+    <!-- Outer concentric colorful rings -->
+    <circle cx="0" cy="0" r="28" fill="#10b981"/>
+    <circle cx="0" cy="0" r="22" fill="#06b6d4"/>
+    <circle cx="0" cy="0" r="16" fill="#f59e0b"/>
+    <circle cx="0" cy="0" r="10" fill="#dc2626"/>
+    <circle cx="0" cy="0" r="4" fill="#ffffff"/>
+  </g>
+  
+  <text x="150" y="340" font-family="'Segoe UI', Roboto, sans-serif" font-size="10" font-weight="500" fill="#64748b" text-anchor="middle">ĐỔI MỚI VÀ DUY TRÌ</text>
+  <text x="150" y="354" font-family="'Segoe UI', Roboto, sans-serif" font-size="10" font-weight="500" fill="#64748b" text-anchor="middle">MỐI QUAN HỆ VỚI KHÁCH HÀNG</text>
+  
+  <!-- Publisher bottom logo -->
+  <rect x="135" y="385" width="30" height="12" rx="2" fill="#0284c7"/>
+  <text x="150" y="394" font-family="'Segoe UI', Roboto, sans-serif" font-size="7" font-weight="700" fill="#ffffff" text-anchor="middle">MINH LONG</text>
+</svg>
