@@ -2,6 +2,7 @@ package com.library.librarymanagement;
 
 import com.library.librarymanagement.exception.BorrowLimitExceededException;
 import com.library.librarymanagement.exception.BorrowTicketAlreadyReturnedException;
+import com.library.librarymanagement.exception.BorrowTicketNotFoundException;
 import com.library.librarymanagement.exception.InvalidBorrowQuantityException;
 import com.library.librarymanagement.exception.InvalidBorrowTicketStatusException;
 import com.library.librarymanagement.exception.OutOfStockException;
@@ -165,6 +166,152 @@ class BorrowServiceTest {
     }
 
     @Test
+    void chargesPriorityStudentAndLecturerAccordingToTheirPolicies() {
+        Reader priority = new PriorityStudentReader("R002", "Tran Binh", "0900000002");
+        Book book1 = book("B001", 1);
+        BorrowTicket priorityTicket = new BorrowTicket(
+                "T002", priority, LocalDate.now().minusDays(17),
+                LocalDate.now().minusDays(3), "BORROWING"
+        );
+        when(ticketRepository.findByIdForUpdate("T002"))
+                .thenReturn(Optional.of(priorityTicket));
+        when(detailRepository.findByBorrowTicketId("T002"))
+                .thenReturn(List.of(new BorrowTicketDetail(priorityTicket, book1, 2)));
+        when(bookRepository.findByIdForUpdate("B001"))
+                .thenReturn(Optional.of(book1));
+
+        Reader lecturer = new LecturerReader("R003", "Le Chi", "0900000003");
+        Book book2 = book("B002", 5);
+        BorrowTicket lecturerTicket = new BorrowTicket(
+                "T003", lecturer, LocalDate.now().minusDays(18),
+                LocalDate.now().minusDays(4), "BORROWING"
+        );
+        when(ticketRepository.findByIdForUpdate("T003"))
+                .thenReturn(Optional.of(lecturerTicket));
+        when(detailRepository.findByBorrowTicketId("T003"))
+                .thenReturn(List.of(new BorrowTicketDetail(lecturerTicket, book2, 1)));
+        when(bookRepository.findByIdForUpdate("B002"))
+                .thenReturn(Optional.of(book2));
+
+        when(returnRecordRepository.save(any(ReturnRecord.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+
+        ReturnRecord priorityRecord = borrowService.returnBook("T002");
+        ReturnRecord lecturerRecord = borrowService.returnBook("T003");
+
+        assertEquals(new BigDecimal("9000"), priorityRecord.getFineAmount());
+        assertEquals(3, book1.getQuantity());
+        assertEquals(new BigDecimal("8000"), lecturerRecord.getFineAmount());
+        assertEquals(6, book2.getQuantity());
+    }
+
+    @Test
+    void returnsBookOnTimeWithZeroFineAndRestoresStockOnce() {
+        Reader reader = new StudentReader("R001", "Nguyen An", "0900000001");
+        Book book = book("B001", 2);
+        BorrowTicket ticket = new BorrowTicket(
+                "T001", reader, LocalDate.now().minusDays(5),
+                LocalDate.now(), "BORROWING"
+        );
+        when(ticketRepository.findByIdForUpdate("T001"))
+                .thenReturn(Optional.of(ticket));
+        when(detailRepository.findByBorrowTicketId("T001"))
+                .thenReturn(List.of(new BorrowTicketDetail(ticket, book, 2)));
+        when(bookRepository.findByIdForUpdate("B001"))
+                .thenReturn(Optional.of(book));
+        when(returnRecordRepository.save(any(ReturnRecord.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+
+        ReturnRecord record = borrowService.returnBook("T001");
+
+        assertEquals(BigDecimal.ZERO, record.getFineAmount());
+        assertEquals(LocalDate.now(), record.getReturnDate());
+        assertEquals(4, book.getQuantity());
+        assertEquals("RETURNED", ticket.getStatus());
+        verify(bookRepository, times(1)).save(book);
+        verify(returnRecordRepository, times(1)).save(any(ReturnRecord.class));
+    }
+
+    @Test
+    void rejectsReturningNonExistentOrBlankTicket() {
+        when(ticketRepository.findByIdForUpdate("T404"))
+                .thenReturn(Optional.empty());
+
+        assertThrows(
+                BorrowTicketNotFoundException.class,
+                () -> borrowService.returnBook("T404")
+        );
+        assertThrows(
+                BorrowTicketNotFoundException.class,
+                () -> borrowService.returnBook("   ")
+        );
+        verify(returnRecordRepository, never()).save(any());
+    }
+
+    @Test
+    void rejectsReturningTicketWithInvalidStatus() {
+        BorrowTicket waitingTicket = new BorrowTicket(
+                "T001",
+                new StudentReader("R001", "Nguyen An", "0900000001"),
+                LocalDate.now(),
+                LocalDate.now().plusDays(14),
+                "WAITING_PICKUP"
+        );
+        when(ticketRepository.findByIdForUpdate("T001"))
+                .thenReturn(Optional.of(waitingTicket));
+
+        assertThrows(
+                InvalidBorrowTicketStatusException.class,
+                () -> borrowService.returnBook("T001")
+        );
+        verify(bookRepository, never()).save(any());
+        verify(returnRecordRepository, never()).save(any());
+    }
+
+    @Test
+    void rejectsDuplicateReturnWhenReturnRecordAlreadyExists() {
+        BorrowTicket ticket = new BorrowTicket(
+                "T001",
+                new StudentReader("R001", "Nguyen An", "0900000001"),
+                LocalDate.now().minusDays(2),
+                LocalDate.now().plusDays(12),
+                "BORROWING"
+        );
+        when(ticketRepository.findByIdForUpdate("T001"))
+                .thenReturn(Optional.of(ticket));
+        when(returnRecordRepository.existsByBorrowTicketId("T001"))
+                .thenReturn(true);
+
+        assertThrows(
+                BorrowTicketAlreadyReturnedException.class,
+                () -> borrowService.returnBook("T001")
+        );
+        verify(returnRecordRepository, never()).save(any());
+    }
+
+    @Test
+    void rejectsInvalidReturnQuantityWithoutUpdatingTicketOrRecord() {
+        Reader reader = new StudentReader("R001", "Nguyen An", "0900000001");
+        Book book = book("B001", 3);
+        BorrowTicket ticket = new BorrowTicket(
+                "T001", reader, LocalDate.now().minusDays(2),
+                LocalDate.now().plusDays(12), "BORROWING"
+        );
+        when(ticketRepository.findByIdForUpdate("T001"))
+                .thenReturn(Optional.of(ticket));
+        when(detailRepository.findByBorrowTicketId("T001"))
+                .thenReturn(List.of(new BorrowTicketDetail(ticket, book, 0)));
+
+        assertThrows(
+                InvalidBorrowQuantityException.class,
+                () -> borrowService.returnBook("T001")
+        );
+        assertEquals(3, book.getQuantity());
+        verify(ticketRepository, never()).save(any());
+        verify(returnRecordRepository, never()).save(any());
+    }
+
+    @Test
     void confirmsPickupOnlyForWaitingTicket() {
         BorrowTicket ticket = new BorrowTicket(
                 "T001", new StudentReader("R001", "Nguyen An", "0900000001"),
@@ -248,6 +395,10 @@ class BorrowServiceTest {
         assertEquals(
                 new BigDecimal("4000"),
                 new LecturerFinePolicy().calculateFine(lecturer, 2)
+        );
+        assertEquals(
+                BigDecimal.ZERO,
+                new NormalStudentFinePolicy().calculateFine(normal, 0)
         );
     }
 

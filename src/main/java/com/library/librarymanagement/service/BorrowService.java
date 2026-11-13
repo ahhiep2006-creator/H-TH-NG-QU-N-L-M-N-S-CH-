@@ -192,15 +192,22 @@ public class BorrowService {
 
     @Transactional
     public ReturnRecord returnBook(String ticketId) {
+        if (ticketId == null || ticketId.isBlank()) {
+            throw new BorrowTicketNotFoundException(
+                    "Vui lòng nhập mã phiếu mượn hợp lệ."
+            );
+        }
+        String normalizedTicketId = ticketId.trim();
 
-        // Tìm phiếu mượn
-        BorrowTicket ticket = borrowTicketRepository.findByIdForUpdate(ticketId)
+        // Tìm phiếu mượn (khóa bi quan tránh thao tác trả đồng thời)
+        BorrowTicket ticket = borrowTicketRepository.findByIdForUpdate(normalizedTicketId)
                 .orElseThrow(() -> new BorrowTicketNotFoundException(
-                        "Không tìm thấy phiếu mượn có mã: " + ticketId
+                        "Không tìm thấy phiếu mượn có mã: " + normalizedTicketId
                 ));
 
-        // Kiểm tra phiếu đã trả chưa
-        if ("RETURNED".equals(ticket.getStatus())) {
+        // Kiểm tra phiếu đã trả chưa (tránh trả trùng)
+        if ("RETURNED".equals(ticket.getStatus())
+                || returnRecordRepository.existsByBorrowTicketId(normalizedTicketId)) {
             throw new BorrowTicketAlreadyReturnedException(
                     "Phiếu mượn này đã được trả sách."
             );
@@ -215,7 +222,7 @@ public class BorrowService {
         // Lấy chi tiết phiếu mượn
         List<BorrowTicketDetail> details =
                 borrowTicketDetailRepository.findByBorrowTicketId(
-                        ticketId
+                        normalizedTicketId
                 );
         if (details.isEmpty()) {
             throw new InvalidBorrowTicketStatusException(
@@ -223,12 +230,15 @@ public class BorrowService {
             );
         }
 
-        // Ngày trả
+        // Ngày trả và kiểm tra hạn trả
         LocalDate returnDate = LocalDate.now();
+        if (ticket.getDueDate() == null) {
+            throw new InvalidBorrowTicketStatusException(
+                    "Phiếu mượn thiếu thông tin ngày hẹn trả."
+            );
+        }
 
-        // Tính số ngày quá hạn
         long overdueDays = 0;
-
         if (returnDate.isAfter(ticket.getDueDate())) {
             overdueDays = ChronoUnit.DAYS.between(
                     ticket.getDueDate(),
@@ -236,20 +246,28 @@ public class BorrowService {
             );
         }
 
-        // Chọn chính sách phạt
-        FinePolicy finePolicy =
-                getFinePolicy(ticket.getReader());
+        // Chọn chính sách phạt theo loại độc giả
+        FinePolicy finePolicy = getFinePolicy(ticket.getReader());
+        BigDecimal fineAmount = finePolicy.calculateFine(
+                ticket.getReader(),
+                overdueDays
+        );
 
-        BigDecimal fineAmount =
-                finePolicy.calculateFine(
-                        ticket.getReader(),
-                        overdueDays
-                );
-
-        // Trả lại số lượng sách
+        // Kiểm tra số lượng hợp lệ và hoàn trả lại số lượng sách vào kho
         for (BorrowTicketDetail detail : details.stream()
                 .sorted(Comparator.comparing(item -> item.getBook().getId()))
                 .toList()) {
+            if (detail.getBook() == null) {
+                throw new BookNotFoundException(
+                        "Không tìm thấy thông tin sách trong chi tiết phiếu."
+                );
+            }
+            if (detail.getQuantity() <= 0) {
+                throw new InvalidBorrowQuantityException(
+                        "Số lượng sách hoàn trả phải lớn hơn 0."
+                );
+            }
+
             Book book = bookRepository.findByIdForUpdate(
                             detail.getBook().getId()
                     )
@@ -259,18 +277,15 @@ public class BorrowService {
                     ));
 
             book.returnBook(detail.getQuantity());
-
             bookRepository.save(book);
         }
 
-        // Đổi trạng thái phiếu
+        // Cập nhật trạng thái phiếu sang đã trả
         ticket.setStatus("RETURNED");
-
         borrowTicketRepository.save(ticket);
 
-        // Tạo bản ghi trả sách
+        // Tạo và lưu bản ghi lịch sử trả sách
         ReturnRecord returnRecord = new ReturnRecord();
-
         returnRecord.setBorrowTicket(ticket);
         returnRecord.setReturnDate(returnDate);
         returnRecord.setFineAmount(fineAmount);
@@ -279,6 +294,9 @@ public class BorrowService {
     }
 
     private FinePolicy getFinePolicy(Reader reader) {
+        if (reader == null) {
+            throw new IllegalStateException("Phiếu mượn không có thông tin bạn đọc.");
+        }
         return finePolicies.stream()
                 .filter(policy -> policy.supports(reader))
                 .findFirst()

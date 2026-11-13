@@ -18,6 +18,21 @@
     <div class="notice success" role="status" th:if="${successMessage}" th:text="${successMessage}"></div>
     <div class="notice error" role="alert" th:if="${errorMessage}" th:text="${errorMessage}"></div>
 
+    <section class="panel" th:if="${returnRecord != null}" style="margin-bottom: 20px;">
+        <h2>Kết quả hoàn trả</h2>
+        <ul style="line-height: 1.9; padding-left: 20px;">
+            <li><strong>Mã phiếu:</strong> <span th:text="${returnRecord.borrowTicket.id}">T001</span></li>
+            <li><strong>Độc giả:</strong>
+                <span th:text="${returnRecord.borrowTicket.reader.fullName}">Nguyen Van A</span>
+                (<span th:text="${returnRecord.borrowTicket.reader.readerTypeLabel}">Sinh viên thường</span>)
+            </li>
+            <li><strong>Ngày hẹn trả:</strong> <span th:text="${returnRecord.borrowTicket.dueDate}">2026-06-30</span></li>
+            <li><strong>Ngày trả thực tế:</strong> <span th:text="${returnRecord.returnDate}">2026-06-30</span></li>
+            <li><strong>Trạng thái phiếu:</strong> Đã trả (RETURNED)</li>
+            <li><strong>Tiền phạt quá hạn:</strong> <span th:text="${returnRecord.fineAmount}">0</span> VNĐ</li>
+        </ul>
+    </section>
+
     <section class="form-layout">
         <form class="panel form-main" th:action="@{/return}" method="post">
             <h2>Thông tin phiếu trả</h2>
@@ -25,6 +40,7 @@
             <div class="form-field">
                 <label for="ticketId">Mã phiếu mượn *</label>
                 <input id="ticketId" type="text" name="ticketId"
+                       th:value="${ticketId}"
                        placeholder="Ví dụ: mã phiếu trên danh sách" required>
             </div>
             <button type="submit">Xác nhận trả sách <span aria-hidden="true">→</span></button>

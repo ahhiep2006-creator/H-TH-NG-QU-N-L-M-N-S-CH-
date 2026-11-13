@@ -1,7 +1,7 @@
 package com.library.librarymanagement.controller;
 
-import com.library.librarymanagement.model.ReturnRecord;
 import com.library.librarymanagement.exception.LibraryBusinessException;
+import com.library.librarymanagement.model.ReturnRecord;
 import com.library.librarymanagement.service.BorrowService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -27,10 +27,12 @@ public class ReturnPageController {
     public String returnBook(
             @RequestParam String ticketId,
             Model model) {
+        String normalizedTicketId = ticketId == null ? "" : ticketId.trim();
 
         try {
-            ReturnRecord record = borrowService.returnBook(ticketId);
+            ReturnRecord record = borrowService.returnBook(normalizedTicketId);
 
+            model.addAttribute("returnRecord", record);
             model.addAttribute(
                     "successMessage",
                     "Trả sách thành công! Tiền phạt: "
@@ -39,7 +41,7 @@ public class ReturnPageController {
             );
 
         } catch (LibraryBusinessException e) {
-
+            model.addAttribute("ticketId", normalizedTicketId);
             model.addAttribute(
                     "errorMessage",
                     e.getMessage()
