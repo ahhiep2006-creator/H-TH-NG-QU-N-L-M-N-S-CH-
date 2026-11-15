@@ -48,6 +48,11 @@
                     <span th:text="${book.author}">Tác giả</span>
                 </div>
 
+                <!-- Book ID -->
+                <div class="card-pill-box">
+                    <span th:text="'Mã sách: ' + ${book.id}">Mã sách</span>
+                </div>
+
                 <!-- Publisher -->
                 <div class="card-pill-box">
                     <span aria-hidden="true">🏢</span>

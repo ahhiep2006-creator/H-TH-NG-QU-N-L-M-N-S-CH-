@@ -6,6 +6,8 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.Pattern;
+import org.hibernate.validator.constraints.URL;
 
 import java.math.BigDecimal;
 
@@ -34,6 +36,11 @@ public class BookForm {
     @DecimalMin(value = "0.00", message = "Giá trị sách không được nhỏ hơn 0.")
     @Digits(integer = 13, fraction = 2, message = "Giá trị tối đa 13 chữ số nguyên và 2 chữ số thập phân.")
     private BigDecimal value;
+
+    @Size(max = 500, message = "Đường dẫn ảnh không được vượt quá 500 ký tự.")
+    @URL(message = "Đường dẫn ảnh phải là URL hợp lệ.")
+    @Pattern(regexp = "^https?://.*$", message = "Đường dẫn ảnh chỉ được bắt đầu bằng http:// hoặc https://.")
+    private String imageUrl;
 
     public String getId() {
         return id;
@@ -81,5 +88,13 @@ public class BookForm {
 
     public void setValue(BigDecimal value) {
         this.value = value;
+    }
+
+    public String getImageUrl() {
+        return imageUrl;
+    }
+
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl == null || imageUrl.isBlank() ? null : imageUrl.trim();
     }
 }
