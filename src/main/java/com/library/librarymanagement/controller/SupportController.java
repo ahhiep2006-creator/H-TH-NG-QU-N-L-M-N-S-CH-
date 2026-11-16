@@ -94,7 +94,7 @@ public class SupportController {
             return "redirect:/admin/support";
         }
         // A status-only update is kept for older admin pages; a response is submitted through /reply.
-        feedbackRepository.findById(id).ifPresent(feedback -> feedback.markInProgress());
+        feedbackRepository.findById(id).ifPresent(SupportFeedback::markInProgress);
         redirectAttributes.addFlashAttribute("successMessage", "Đã cập nhật trạng thái yêu cầu.");
         return "redirect:/admin/support";
     }
@@ -126,7 +126,7 @@ public class SupportController {
                                  HttpSession session, RedirectAttributes redirectAttributes) {
         if (!isAdmin(session)) return "redirect:/admin/login";
         if (!hasValidCsrfToken(csrfToken, session)) return "redirect:/admin/support";
-        feedbackRepository.findById(id).ifPresent(feedback -> feedback.markInProgress());
+        feedbackRepository.findById(id).ifPresent(SupportFeedback::markInProgress);
         redirectAttributes.addFlashAttribute("successMessage", "Yêu cầu đã được chuyển sang trạng thái đang xử lý.");
         return "redirect:/admin/support";
     }
