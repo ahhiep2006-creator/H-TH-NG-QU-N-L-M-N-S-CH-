@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Liên hệ &amp; Hỗ trợ | Thư viện Phenikaa</title>
+    <link rel="stylesheet" th:href="@{/css/library.css}">
+</head>
+<body>
+<div th:replace="~{fragments :: navbar}"></div>
+<main class="books-container contact-page">
+    <div class="page-title-banner">
+        <div class="banner-heading-wrap">
+            <h1>Trung tâm hỗ trợ thư viện</h1>
+            <p>Gửi yêu cầu, theo dõi tiến trình xử lý và xem phản hồi trực tiếp tại đây.</p>
+        </div>
+    </div>
+    <div class="alert-notice alert-success" role="status" th:if="${successMessage}" th:text="${successMessage}"></div>
+    <div class="alert-notice alert-error" role="alert" th:if="${errorMessage}" th:text="${errorMessage}"></div>
+    <div class="contact-page-grid">
+        <section class="form-panel-card contact-info-panel">
+            <span class="support-eyebrow">PHENIKAA UNIVERSITY · LIBRARY</span>
+            <h2>Chúng tôi có thể giúp gì?</h2>
+            <p class="contact-intro">Mỗi yêu cầu sẽ có trạng thái riêng. Khi thư viện trả lời, nội dung sẽ xuất hiện trong danh sách theo dõi của bạn.</p>
+            <div class="contact-detail-list">
+                <div class="contact-detail-item"><span>📍</span><div><strong>Địa chỉ thư viện</strong><p>Tầng 3, Tòa A9, Đại học Phenikaa</p></div></div>
+                <div class="contact-detail-item"><span>✉️</span><div><strong>Email hỗ trợ</strong><p>24100072@st.phenikaa-uni.edu.vn</p></div></div>
+                <div class="contact-detail-item"><span>🕒</span><div><strong>Thời gian hỗ trợ</strong><p>Thứ 2 – Thứ 7 · 8:00–19:00</p></div></div>
+            </div>
+            <div class="contact-note"><span>🔒</span><span>Thông tin của bạn chỉ được dùng để xử lý yêu cầu hỗ trợ.</span></div>
+        </section>
+        <section class="form-panel-card contact-form-panel">
+            <div class="support-form-heading"><span class="support-form-icon">✦</span><div><h2>Gửi yêu cầu hỗ trợ</h2><p>Thường mất chưa đến 2 phút</p></div></div>
+            <form th:action="@{/contact/feedback}" method="post">
+                <div class="form-group">
+                    <label for="studentName">Họ và tên *</label>
+                    <input id="studentName" name="studentName" type="text" class="form-control-input" maxlength="100" placeholder="Tên của bạn" th:value="${feedbackName}" required>
+                </div>
+                <div class="form-group">
+                    <label for="email">Email Phenikaa *</label>
+                    <input id="email" name="email" type="email" class="form-control-input" maxlength="150" placeholder="tenban@st.phenikaa-uni.edu.vn" th:value="${feedbackEmail != null ? feedbackEmail : trackedEmail}" required>
+                </div>
+                <div class="form-group">
+                    <label for="category">Chủ đề *</label>
+                    <select id="category" name="category" class="form-control-select" required>
+                        <option value="">Chọn chủ đề cần hỗ trợ</option>
+                        <option value="Tài khoản thư viện" th:selected="${feedbackCategory == 'Tài khoản thư viện'}">Tài khoản thư viện</option>
+                        <option value="Mượn và trả sách" th:selected="${feedbackCategory == 'Mượn và trả sách'}">Mượn và trả sách</option>
+                        <option value="Tìm kiếm tài liệu" th:selected="${feedbackCategory == 'Tìm kiếm tài liệu'}">Tìm kiếm tài liệu</option>
+                        <option value="Góp ý dịch vụ" th:selected="${feedbackCategory == 'Góp ý dịch vụ'}">Góp ý dịch vụ</option>
+                        <option value="Khác" th:selected="${feedbackCategory == 'Khác'}">Khác</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="message">Nội dung *</label>
+                    <textarea id="message" name="message" class="form-control-input support-message-input" maxlength="3000" placeholder="Mô tả vấn đề hoặc góp ý của bạn..." th:text="${feedbackMessage}" required></textarea>
+                    <small class="support-field-hint">Tối thiểu 10 ký tự · Tối đa 3.000 ký tự</small>
+                </div>
+                <button type="submit" class="btn-form-submit support-submit">Gửi phản hồi <span aria-hidden="true">→</span></button>
+            </form>
+        </section>
+    </div>
+    <section class="my-support-section">
+        <div class="my-support-heading">
+            <div><span class="support-eyebrow">TRA CỨU VÀ THEO DÕI</span><h2>Đơn hỗ trợ &amp; phản hồi</h2><p>Nhập email đã dùng khi gửi đơn để xem tiến trình và câu trả lời từ thư viện.</p></div>
+            <span class="my-support-count" th:if="${trackedEmail != null}"><strong th:text="${#lists.size(myFeedbackItems)}">0</strong> yêu cầu</span>
+        </div>
+        <form class="support-lookup-form" th:action="@{/contact}" method="get"><label for="lookupEmail">Email sinh viên</label><div><input id="lookupEmail" name="lookupEmail" type="email" placeholder="tenban@st.phenikaa-uni.edu.vn" th:value="${lookupEmail}" required><button type="submit">Tra cứu đơn <span aria-hidden="true">→</span></button></div><small>Danh sách chỉ hiển thị yêu cầu được gửi bằng email này.</small></form>
+        <div class="my-support-empty" th:if="${trackedEmail == null}"><span>⌕</span><div><strong>Tra cứu các yêu cầu của bạn</strong><p>Nhập email Phenikaa đã dùng gửi hỗ trợ để xem trạng thái, lịch sử xử lý và phản hồi.</p></div></div>
+        <div class="my-support-empty" th:if="${trackedEmail != null and #lists.isEmpty(myFeedbackItems)}"><span>✦</span><div><strong>Chưa tìm thấy đơn hỗ trợ</strong><p>Chưa có đơn nào được gửi bằng email <b th:text="${trackedEmail}">email</b>. Kiểm tra lại email hoặc gửi yêu cầu mới phía trên.</p></div></div>
+        <article class="my-support-ticket" th:each="ticket, iter : ${myFeedbackItems}">
+            <div class="my-ticket-top"><div><span class="my-ticket-number" th:text="|YÊU CẦU #${ticket.id}|">YÊU CẦU #1</span><h3 th:text="${ticket.category}">Chủ đề</h3></div><span class="my-ticket-status" th:classappend="${ticket.status == 'RESPONDED'} ? ' ticket-status-done' : (${ticket.status == 'IN_PROGRESS'} ? ' ticket-status-progress' : ' ticket-status-new')" th:text="${ticket.statusLabel}">Đã tiếp nhận</span></div>
+            <div class="my-ticket-timeline">
+                <div class="my-timeline-step is-complete"><span>✓</span><div><strong>Đã tiếp nhận</strong><small th:text="${ticket.createdAtFormatted}">19/10/2026 10:30</small></div></div>
+                <div class="my-timeline-step" th:classappend="${ticket.status == 'IN_PROGRESS' or ticket.status == 'RESPONDED'} ? ' is-complete' : ''"><span th:text="${ticket.status == 'IN_PROGRESS' or ticket.status == 'RESPONDED'} ? '✓' : '2'">2</span><div><strong>Đang được thư viện xử lý</strong><small th:if="${ticket.status == 'IN_PROGRESS'}">Nhân viên thư viện đang xem xét yêu cầu</small><small th:unless="${ticket.status == 'IN_PROGRESS'}">Cập nhật khi yêu cầu được tiếp nhận xử lý</small></div></div>
+                <div class="my-timeline-step" th:classappend="${ticket.status == 'RESPONDED'} ? ' is-complete' : ''"><span th:text="${ticket.status == 'RESPONDED'} ? '✓' : '3'">3</span><div><strong>Thư viện phản hồi</strong><small th:if="${ticket.status == 'RESPONDED'}" th:text="${ticket.repliedAtFormatted}">19/10/2026 12:00</small><small th:unless="${ticket.status == 'RESPONDED'}">Phản hồi sẽ hiện tại đây</small></div></div>
+            </div>
+            <div class="my-ticket-message"><strong>Nội dung bạn đã gửi</strong><p th:text="${ticket.message}">Nội dung</p></div>
+            <div class="my-ticket-reply" th:if="${ticket.adminReply != null and !ticket.adminReply.isBlank()}"><div class="reply-heading"><span>✉</span><div><strong>Phản hồi từ Thư viện Phenikaa</strong><small th:text="${ticket.repliedAtFormatted}">19/10/2026 12:00</small></div></div><p th:text="${ticket.adminReply}">Nội dung trả lời</p></div>
+        </article>
+    </section>
+</main>
+<div th:replace="~{fragments :: footer}"></div>
+</body>
+</html>
