@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<!-- ==================== HEADER NAVBAR ==================== -->
+<header class="site-header" th:fragment="navbar">
+    <div class="nav-wrap">
+        <!-- Logo: Red Diamond Seal -->
+        <a class="brand" th:href="@{/}">
+            <img class="brand-wordmark-img" th:src="@{/images/logo-phenikaa.png}" alt="Đại học Phenikaa">
+            <span class="brand-title-stack"><small>THƯ VIỆN</small></span>
+        </a>
+
+        <!-- Main Navigation Links -->
+        <nav class="main-nav" aria-label="Điều hướng chính">
+            <a th:href="@{/books}">Mượn sách</a>
+            <a th:href="@{/rules}">Nội quy</a>
+            <a th:unless="${session.adminLoggedIn}" th:href="@{/contact}">Liên hệ</a>
+            <a th:if="${session.adminLoggedIn}" th:href="@{/admin/support}">Hỗ trợ</a>
+        </nav>
+
+        <!-- Search Bar -->
+        <form class="nav-search" th:action="@{/books}" method="get" role="search">
+            <span class="nav-search-icon" aria-hidden="true">🔍</span>
+            <input class="nav-search-input" type="search" name="keyword" th:value="${keyword}"
+                   placeholder="Tìm kiếm sách, tác giả...">
+        </form>
+
+        <!-- Right Side Auth & Profile Widget -->
+        <div class="nav-auth">
+            <!-- If Admin Logged In -->
+            <div th:if="${session.adminLoggedIn}" style="display:flex; align-items:center; gap:14px;">
+                <a th:href="@{/tickets}" class="badge-admin-header">LIBRARY ADMIN</a>
+                <div class="user-text-info"><span class="user-text-name">Đinh Trọng Hiệp</span><span class="user-text-email">24100072@st.phenikaa-uni.edu.vn</span></div>
+                <a th:href="@{/admin/books}" style="font-size:13.5px; font-weight:600; color:#1c5b81;">＋ Thêm sách</a>
+                <form th:action="@{/admin/logout}" method="post" style="display:inline;">
+                    <input type="hidden" name="csrfToken" th:value="${session.adminCsrfToken}">
+                    <button type="submit" style="background:none; border:none; color:#ef4444; font-weight:600; cursor:pointer; font-size:13.5px;">Đăng xuất</button>
+                </form>
+            </div>
+
+            <!-- If Not Admin (Regular User Display matching Screenshots) -->
+            <div th:unless="${session.adminLoggedIn}" class="user-profile-widget">
+                <!-- Notification Bell with badge 2 -->
+                <button class="bell-badge-btn" type="button" aria-label="Thông báo" title="2 thông báo mới">
+                    🔔
+                    <span class="bell-badge-count">2</span>
+                </button>
+
+                <!-- User Profile Pill linking to /profile -->
+                <a th:href="@{/profile}" class="user-avatar-pill" title="Xem thông tin cá nhân">
+                    <div class="avatar-circle-sm">👤</div>
+                    <div class="user-text-info">
+                        <span class="user-text-name">Nguyen Van A</span>
+                        <span class="user-text-email">nam_2251220175@dau.edu.vn</span>
+                    </div>
+                </a>
+
+                <!-- Admin Link -->
+                <a th:href="@{/admin/login}" style="font-size:13px; color:#94a3b8; margin-left:6px;" title="Đăng nhập quản trị viên">Quản trị</a>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- ==================== FOOTER (Matching Image 4) ==================== -->
+<footer class="site-footer" th:fragment="footer">
+    <div class="footer-inner-grid">
+        <!-- Col 1: Brand Info -->
+        <div class="footer-col">
+            <div class="footer-brand-title">
+                <img class="footer-brand-logo" th:src="@{/images/logo-phenikaa.png}" alt="Đại học Phenikaa">
+                <span class="footer-brand-copy"><strong>THƯ VIỆN</strong><small>ĐẠI HỌC PHENIKAA</small></span>
+            </div>
+            <p class="footer-desc">
+                Hệ thống quản lý thư viện hiện đại, cung cấp dịch vụ mượn sách trực tuyến và quản lý tài liệu hiệu quả. Giúp bạn tiếp cận với kho tàng tri thức một cách dễ dàng.
+            </p>
+        </div>
+
+        <!-- Col 2: Quick Links -->
+        <div class="footer-col">
+            <h3>Liên kết nhanh</h3>
+            <ul class="footer-links-list">
+                <li><a th:href="@{/}">→ Trang chủ</a></li>
+                <li><a th:href="@{/books}">→ Danh mục sách</a></li>
+                <li><a th:href="@{/rules}">→ Quy định mượn sách</a></li>
+                <li><a th:href="@{/contact}">→ Liên hệ</a></li>
+            </ul>
+        </div>
+
+        <!-- Col 3: Contact Info -->
+        <div class="footer-col">
+            <h3>Liên hệ</h3>
+            <div class="footer-contact-info">
+                <div class="contact-item">
+                    <span class="contact-icon">📍</span>
+                    <span>Tầng 3, Tòa A9, Đại học Phenikaa</span>
+                </div>
+                <div class="contact-item">
+                    <span class="contact-icon">📞</span>
+                    <span>0353788379</span>
+                </div>
+                <div class="contact-item">
+                    <span class="contact-icon">✉️</span>
+                    <span>24100072@st.phenikaa-uni.edu.vn</span>
+                </div>
+                <div class="contact-item">
+                    <span class="contact-icon">🕒</span>
+                    <span>Thứ 2 - Thứ 7: 8:00 - 19:00</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer-bottom-copy">
+        <span>© 2026 Thư viện sinh viên · Không gian kết nối tri thức.</span>
+        <span>Hệ thống quản lý mượn trả tài liệu trực tuyến.</span>
+    </div>
+
+    <!-- Floating Chat Zalo Button (Matching Image 1, 2, 3) -->
+    <a href="https://zalo.me" target="_blank" rel="noopener noreferrer" class="floating-zalo-btn" aria-label="Chat Zalo">
+        <svg class="zalo-icon-svg" viewBox="0 0 24 24">
+            <path d="M12 2C6.48 2 2 6.03 2 11C2 13.68 3.32 16.07 5.42 17.65L4.5 21.5L8.5 19.87C9.6 20.27 10.77 20.5 12 20.5C17.52 20.5 22 16.47 22 11C22 6.03 17.52 2 12 2ZM12 18.5C10.97 18.5 9.98 18.3 9.07 17.94L8.74 17.8L6.2 18.82L6.81 16.38L6.56 16C4.84 14.65 3.8 12.74 3.8 11C3.8 7.02 7.48 3.8 12 3.8C16.52 3.8 20.2 7.02 20.2 11C20.2 14.98 16.52 18.5 12 18.5Z"/>
+        </svg>
+        <span>Chat Zalo</span>
+    </a>
+</footer>
+
+</body>
+</html>

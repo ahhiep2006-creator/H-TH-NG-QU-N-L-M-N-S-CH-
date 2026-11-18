@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Nội quy &amp; Hướng dẫn | Thư viện sinh viên</title>
+    <link rel="stylesheet" th:href="@{/css/library.css}">
+</head>
+<body>
+<!-- Navbar -->
+<div th:replace="~{fragments :: navbar}"></div>
+
+<main class="books-container" style="max-width: 900px;">
+    <div class="page-title-banner">
+        <div class="banner-heading-wrap">
+            <h1>Nội quy &amp; Quy định mượn trả tài liệu</h1>
+            <p>Quy định chi tiết nhằm bảo đảm quyền lợi học tập và nghiên cứu của toàn thể bạn đọc.</p>
+        </div>
+    </div>
+
+    <div class="form-panel-card" style="margin: 0 0 24px 0; max-width: none;">
+        <h2 style="font-size: 18px; color: #0f172a; margin-bottom: 14px;">1. Quy định về Thẻ thư viện &amp; Hạn mức mượn</h2>
+        <ul style="padding-left: 20px; line-height: 2; color: #334155;">
+            <li><strong>Sinh viên hệ chính quy (chuẩn):</strong> Tối đa <strong>3 cuốn sách</strong> cùng thời điểm.</li>
+            <li><strong>Sinh viên diện ưu tiên (nghiên cứu khoa học, thành tích cao):</strong> Tối đa <strong>5 cuốn sách</strong>.</li>
+            <li><strong>Giảng viên &amp; Cán bộ nghiên cứu:</strong> Tối đa <strong>10 cuốn sách</strong>.</li>
+            <li>Thời hạn mượn tiêu chuẩn: <strong>14 ngày</strong> kể từ thời điểm nhận sách.</li>
+        </ul>
+    </div>
+
+    <div class="form-panel-card" style="margin: 0 0 24px 0; max-width: none;">
+        <h2 style="font-size: 18px; color: #0f172a; margin-bottom: 14px;">2. Chính sách phạt mượn quá hạn (FinePolicy)</h2>
+        <p style="color: #64748b; margin-bottom: 12px;">Khi trả sách sau ngày hẹn (due date), độc giả sẽ đóng phí quá hạn tự động theo số ngày trễ:</p>
+        <ul style="padding-left: 20px; line-height: 2; color: #334155;">
+            <li><strong>Sinh viên thường:</strong> 5.000 VNĐ / ngày trễ.</li>
+            <li><strong>Sinh viên ưu tiên:</strong> 3.000 VNĐ / ngày trễ.</li>
+            <li><strong>Giảng viên:</strong> 2.000 VNĐ / ngày trễ.</li>
+        </ul>
+    </div>
+
+    <div class="form-panel-card" style="margin: 0; max-width: none;">
+        <h2 style="font-size: 18px; color: #0f172a; margin-bottom: 14px;">3. Bảo quản tài liệu thư viện</h2>
+        <p style="color: #334155; line-height: 1.8;">
+            Độc giả có trách nhiệm giữ gìn sách nguyên vẹn, không vẽ, viết, xé rách hay làm bẩn trang sách. Mọi trường hợp làm mất hoặc hư hỏng nặng sẽ phải bồi thường theo giá trị niêm yết của cuốn sách.
+        </p>
+    </div>
+</main>
+
+<!-- Footer -->
+<div th:replace="~{fragments :: footer}"></div>
+</body>
+</html>
