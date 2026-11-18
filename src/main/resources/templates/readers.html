@@ -41,9 +41,32 @@
         <div class="admin-panel-topbar">
             <h1>Danh sách độc giả &amp; Bạn đọc thư viện</h1>
             <div class="admin-sort-wrap">
+                <a th:if="${session.adminLoggedIn}" class="btn-nav-register"
+                   style="font-size:13px; padding:8px 18px; margin-right:8px;"
+                   th:href="@{/readers/new}">＋ Thêm độc giả</a>
                 <a class="btn-nav-register" style="font-size:13px; padding:8px 18px;" th:href="@{/profile}">Xem thẻ cá nhân →</a>
             </div>
         </div>
+
+        <div class="alert-notice alert-success" th:if="${successMessage}" th:text="${successMessage}"></div>
+        <div class="alert-notice alert-error" th:if="${errorMessage}" th:text="${errorMessage}"></div>
+
+        <!-- Tìm kiếm + lọc theo loại -->
+        <form th:action="@{/readers}" method="get"
+              style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:16px; align-items:center;">
+            <input type="search" name="search" class="form-control-input" style="max-width:320px;"
+                   placeholder="Tìm theo mã hoặc họ tên..." th:value="${search}">
+            <select name="type" class="form-control-input" style="max-width:220px;">
+                <option value="" th:selected="${type == ''}">Tất cả loại bạn đọc</option>
+                <option value="NORMAL" th:selected="${type == 'NORMAL'}">Sinh viên thường</option>
+                <option value="PRIORITY" th:selected="${type == 'PRIORITY'}">Sinh viên ưu tiên</option>
+                <option value="LECTURER" th:selected="${type == 'LECTURER'}">Giảng viên</option>
+            </select>
+            <button type="submit" class="btn-card-borrow" style="padding:10px 18px;">Tìm kiếm</button>
+            <a class="btn-table-revert" style="text-decoration:none;"
+               th:if="${!#strings.isEmpty(search) or !#strings.isEmpty(type)}"
+               th:href="@{/readers}">Xóa bộ lọc</a>
+        </form>
 
         <div class="admin-table-container" th:if="${!#lists.isEmpty(readers)}">
             <table class="admin-tickets-table">
@@ -71,13 +94,28 @@
                         <span class="tag-stock-green" th:text="${reader.maxBorrowQuantity} + ' cuốn'">3 cuốn</span>
                     </td>
                     <td>
-                        <a class="btn-table-pickup" style="text-decoration:none; display:inline-block;"
-                           th:href="@{/borrow}">Mượn sách</a>
+                        <div style="display:flex; gap:6px; flex-wrap:wrap; align-items:center;">
+                            <a class="btn-table-pickup" style="text-decoration:none; display:inline-block;"
+                               th:href="@{/borrow}">Mượn sách</a>
+                            <a th:if="${session.adminLoggedIn}" class="btn-table-return"
+                               style="text-decoration:none; display:inline-block;"
+                               th:href="@{/readers/{id}/edit(id=${reader.id})}">Sửa</a>
+                            <form th:if="${session.adminLoggedIn}" th:action="@{/readers/{id}/delete(id=${reader.id})}"
+                                  method="post" style="display:inline;"
+                                  onsubmit="return confirm('Bạn có chắc muốn xóa độc giả này?');">
+                                <input type="hidden" name="csrfToken" th:value="${csrfToken}">
+                                <button type="submit" class="btn-table-revert">Xóa</button>
+                            </form>
+                        </div>
                     </td>
                 </tr>
                 </tbody>
             </table>
         </div>
+
+        <p th:if="${#lists.isEmpty(readers)}" style="color:#64748b; margin-top:16px;">
+            Không tìm thấy độc giả nào phù hợp.
+        </p>
     </section>
 </main>
 
