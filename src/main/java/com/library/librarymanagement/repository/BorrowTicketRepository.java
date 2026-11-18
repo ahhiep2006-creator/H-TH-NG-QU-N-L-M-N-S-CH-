@@ -26,4 +26,7 @@ public interface BorrowTicketRepository extends JpaRepository<BorrowTicket, Stri
             String readerId,
             String status
     );
+
+    // MỚI: kiểm tra độc giả đã từng có phiếu mượn chưa (dùng khi xóa độc giả)
+    boolean existsByReaderId(String readerId);
 }

@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Thông tin độc giả | Library Admin</title>
+    <link rel="stylesheet" th:href="@{/css/library.css}">
+</head>
+<body>
+<!-- Navbar -->
+<div th:replace="~{fragments :: navbar}"></div>
+
+<main class="admin-dashboard-layout">
+    <aside class="admin-sidebar">
+        <a class="admin-nav-item" th:href="@{/admin/statistics}"><span>📈</span><span>Thống kê</span></a>
+        <a class="admin-nav-item" th:href="@{/admin/books}"><span>📖</span><span>Quản lý sách</span></a>
+        <a class="admin-nav-item" th:href="@{/tickets}"><span>📑</span><span>Quản lý mượn sách</span></a>
+        <a class="admin-nav-item" th:href="@{/profile}"><span>💳</span><span>Thông tin cá nhân</span></a>
+        <a class="admin-nav-item active" th:href="@{/readers}"><span>👤</span><span>Quản lý người dùng</span></a>
+        <a class="admin-nav-item" th:href="@{/admin/support}"><span>💬</span><span>Hỗ trợ sinh viên</span></a>
+    </aside>
+
+    <section class="admin-main-panel">
+        <div class="admin-panel-topbar">
+            <h1 th:text="${editing} ? 'Sửa thông tin độc giả' : 'Thêm độc giả mới'">Thêm độc giả mới</h1>
+            <a class="btn-table-revert" th:href="@{/readers}">← Danh sách độc giả</a>
+        </div>
+
+        <form th:action="${editing} ? @{/readers/{id}(id=${readerForm.id})} : @{/readers}"
+              th:object="${readerForm}" method="post" style="max-width: 680px;">
+            <input type="hidden" name="csrfToken" th:value="${csrfToken}">
+
+            <div class="alert-notice alert-error" th:if="${#fields.hasGlobalErrors()}">
+                <p th:each="err : ${#fields.globalErrors()}" th:text="${err}"></p>
+            </div>
+
+            <div class="form-group" th:if="${editing}">
+                <label>Mã bạn đọc</label>
+                <input type="text" class="form-control-input" th:value="${readerForm.id}" readonly>
+            </div>
+
+            <div class="form-group">
+                <label for="fullName">Họ và tên *</label>
+                <input id="fullName" type="text" class="form-control-input" th:field="*{fullName}"
+                       placeholder="VD: Nguyễn Văn An" required maxlength="100">
+                <small style="color:#ef4444; font-size:12px;" th:if="${#fields.hasErrors('fullName')}" th:errors="*{fullName}"></small>
+            </div>
+
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+                <div class="form-group">
+                    <label for="phone">Số điện thoại *</label>
+                    <input id="phone" type="text" class="form-control-input" th:field="*{phone}"
+                           placeholder="VD: 0901234567" required maxlength="11">
+                    <small style="color:#ef4444; font-size:12px;" th:if="${#fields.hasErrors('phone')}" th:errors="*{phone}"></small>
+                </div>
+
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input id="email" type="email" class="form-control-input" th:field="*{email}"
+                           placeholder="VD: an@dau.edu.vn" maxlength="100">
+                    <small style="color:#ef4444; font-size:12px;" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></small>
+                </div>
+            </div>
+
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+                <div class="form-group">
+                    <label for="studentCode">Mã sinh viên / mã giảng viên</label>
+                    <input id="studentCode" type="text" class="form-control-input" th:field="*{studentCode}"
+                           placeholder="VD: 2251220171" maxlength="50">
+                    <small style="color:#ef4444; font-size:12px;" th:if="${#fields.hasErrors('studentCode')}" th:errors="*{studentCode}"></small>
+                </div>
+
+                <div class="form-group">
+                    <label for="address">Địa chỉ</label>
+                    <input id="address" type="text" class="form-control-input" th:field="*{address}"
+                           placeholder="VD: Hà Nội" maxlength="200">
+                    <small style="color:#ef4444; font-size:12px;" th:if="${#fields.hasErrors('address')}" th:errors="*{address}"></small>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="readerType">Loại bạn đọc *</label>
+                <!-- Khi sửa: khóa loại bạn đọc (mỗi loại là một lớp con riêng) -->
+                <select id="readerType" class="form-control-input" th:field="*{readerType}" th:disabled="${editing}">
+                    <option value="NORMAL">Sinh viên thường (tối đa 3 cuốn)</option>
+                    <option value="PRIORITY">Sinh viên ưu tiên (tối đa 5 cuốn)</option>
+                    <option value="LECTURER">Giảng viên (tối đa 10 cuốn)</option>
+                </select>
+                <!-- select bị disabled sẽ không gửi giá trị, nên gửi kèm input ẩn khi sửa -->
+                <input type="hidden" name="readerType" th:if="${editing}" th:value="${readerForm.readerType}">
+                <small style="color:#64748b; font-size:12px;" th:if="${editing}">
+                    Loại bạn đọc không thể thay đổi sau khi tạo.
+                </small>
+                <small style="color:#ef4444; font-size:12px;" th:if="${#fields.hasErrors('readerType')}" th:errors="*{readerType}"></small>
+            </div>
+
+            <button type="submit" class="btn-card-borrow" style="width:100%; padding:12px; margin-top:14px; font-size:14.5px;"
+                    th:text="${editing} ? 'Lưu thay đổi' : '＋ Thêm độc giả'">
+                ＋ Thêm độc giả
+            </button>
+        </form>
+    </section>
+</main>
+
+<div th:replace="~{fragments :: footer}"></div>
+</body>
+</html>
