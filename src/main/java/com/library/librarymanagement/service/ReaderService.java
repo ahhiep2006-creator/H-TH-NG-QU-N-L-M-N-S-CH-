@@ -19,6 +19,7 @@ public class ReaderService {
 
     private final ReaderRepository readerRepository;
     private final BorrowTicketRepository borrowTicketRepository;
+    private final Object createLock = new Object();
 
     public ReaderService(ReaderRepository readerRepository,
                          BorrowTicketRepository borrowTicketRepository) {
@@ -47,19 +48,35 @@ public class ReaderService {
                 .orElseThrow(() -> new ReaderNotFoundException("Không tìm thấy độc giả " + id + "."));
     }
 
-    @Transactional
+    /**
+     * Thêm độc giả mới.
+     *
+     * Cố ý KHÔNG đặt @Transactional ở đây: việc sinh mã và lưu phải nằm trọn trong khóa
+     * createLock, và lệnh save() tự commit xong trước khi nhả khóa. Nhờ vậy khi nhiều yêu cầu
+     * thêm độc giả đến cùng lúc, yêu cầu sau luôn nhìn thấy mã mà yêu cầu trước vừa lưu
+     * và sẽ nhận mã kế tiếp, không bao giờ trùng mã.
+     * (Khóa này đủ cho một ứng dụng chạy một tiến trình. Nếu sau này chạy nhiều máy chủ,
+     * nên chuyển sang sequence của cơ sở dữ liệu.)
+     */
     public Reader create(ReaderForm form) {
-        String id = nextReaderId();
+        validateReaderType(form.getReaderType());
         String name = form.getFullName().trim();
         String phone = form.getPhone().trim();
 
-        Reader reader = switch (form.getReaderType()) {
-            case "PRIORITY" -> new PriorityStudentReader(id, name, phone);
-            case "LECTURER" -> new LecturerReader(id, name, phone);
-            default -> new StudentReader(id, name, phone);
-        };
-        applyOptionalFields(reader, form);
-        return readerRepository.save(reader);
+        synchronized (createLock) {
+            String id = nextReaderId();
+            if (readerRepository.existsById(id)) {
+                throw new LibraryBusinessException("Mã độc giả " + id + " đã tồn tại, vui lòng thử lại.");
+            }
+
+            Reader reader = switch (form.getReaderType()) {
+                case "PRIORITY" -> new PriorityStudentReader(id, name, phone);
+                case "LECTURER" -> new LecturerReader(id, name, phone);
+                default -> new StudentReader(id, name, phone);
+            };
+            applyOptionalFields(reader, form);
+            return readerRepository.save(reader);
+        }
     }
 
     @Transactional
@@ -80,6 +97,12 @@ public class ReaderService {
                     "Không thể xóa " + id + " vì độc giả này đã có phiếu mượn sách.");
         }
         readerRepository.delete(reader);
+    }
+
+    private void validateReaderType(String type) {
+        if (!"NORMAL".equals(type) && !"PRIORITY".equals(type) && !"LECTURER".equals(type)) {
+            throw new LibraryBusinessException("Loại bạn đọc không hợp lệ.");
+        }
     }
 
     private void applyOptionalFields(Reader reader, ReaderForm form) {
