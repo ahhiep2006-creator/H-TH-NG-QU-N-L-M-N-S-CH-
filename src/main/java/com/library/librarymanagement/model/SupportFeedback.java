@@ -1,3 +1,4 @@
+
 package com.library.librarymanagement.model;
 
 import jakarta.persistence.*;
@@ -8,7 +9,12 @@ import java.time.format.DateTimeFormatter;
 @Table(name = "support_feedback")
 public class SupportFeedback {
 
-    private static final DateTimeFormatter DISPLAY_FORMAT = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+    private static final DateTimeFormatter DISPLAY_FORMAT =
+            DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+
+    public static final String STATUS_NEW = "NEW";
+    public static final String STATUS_IN_PROGRESS = "IN_PROGRESS";
+    public static final String STATUS_RESPONDED = "RESPONDED";
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -30,7 +36,7 @@ public class SupportFeedback {
     private LocalDateTime createdAt;
 
     @Column(nullable = false)
-    private boolean resolved;
+    private boolean resolved = false;
 
     @Column(name = "admin_reply", length = 3000)
     private String adminReply;
@@ -39,18 +45,24 @@ public class SupportFeedback {
     private LocalDateTime repliedAt;
 
     @Column(length = 24)
-    private String status = "NEW";
+    private String status = STATUS_NEW;
 
     protected SupportFeedback() {
     }
 
-    public SupportFeedback(String studentName, String email, String category, String message) {
+    public SupportFeedback(
+            String studentName,
+            String email,
+            String category,
+            String message
+    ) {
         this.studentName = studentName;
         this.email = email;
         this.category = category;
         this.message = message;
         this.createdAt = LocalDateTime.now();
         this.resolved = false;
+        this.status = STATUS_NEW;
     }
 
     @PrePersist
@@ -58,36 +70,102 @@ public class SupportFeedback {
         if (createdAt == null) {
             createdAt = LocalDateTime.now();
         }
+
+        if (status == null || status.isBlank()) {
+            status = STATUS_NEW;
+        }
     }
 
-    public Long getId() { return id; }
-    public String getStudentName() { return studentName; }
-    public String getEmail() { return email; }
-    public String getCategory() { return category; }
-    public String getMessage() { return message; }
-    public LocalDateTime getCreatedAt() { return createdAt; }
-    public String getCreatedAtFormatted() { return createdAt == null ? "" : createdAt.format(DISPLAY_FORMAT); }
-    public boolean isResolved() { return resolved; }
-    public String getAdminReply() { return adminReply; }
-    public LocalDateTime getRepliedAt() { return repliedAt; }
-    public String getRepliedAtFormatted() { return repliedAt == null ? "" : repliedAt.format(DISPLAY_FORMAT); }
-    public String getStatus() { return status == null ? "NEW" : status; }
+    public Long getId() {
+        return id;
+    }
+
+    public String getStudentName() {
+        return studentName;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public String getCategory() {
+        return category;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public String getCreatedAtFormatted() {
+        return createdAt == null
+                ? ""
+                : createdAt.format(DISPLAY_FORMAT);
+    }
+
+    public boolean isResolved() {
+        return resolved;
+    }
+
+    public String getAdminReply() {
+        return adminReply;
+    }
+
+    public LocalDateTime getRepliedAt() {
+        return repliedAt;
+    }
+
+    public String getRepliedAtFormatted() {
+        return repliedAt == null
+                ? ""
+                : repliedAt.format(DISPLAY_FORMAT);
+    }
+
+    public String getStatus() {
+        return status == null || status.isBlank()
+                ? STATUS_NEW
+                : status;
+    }
+
     public String getStatusLabel() {
         return switch (getStatus()) {
-            case "IN_PROGRESS" -> "Đang xử lý";
-            case "RESPONDED" -> "Đã phản hồi";
+            case STATUS_IN_PROGRESS -> "Đang xử lý";
+            case STATUS_RESPONDED -> "Đã phản hồi";
             default -> "Đã tiếp nhận";
         };
     }
 
     public void markInProgress() {
-        if (!resolved && (adminReply == null || adminReply.isBlank())) status = "IN_PROGRESS";
+        if (resolved) {
+            return;
+        }
+
+        if (adminReply != null && !adminReply.isBlank()) {
+            return;
+        }
+
+        status = STATUS_IN_PROGRESS;
     }
 
     public void reply(String adminReply) {
-        this.adminReply = adminReply;
+        if (adminReply == null || adminReply.isBlank()) {
+            throw new IllegalArgumentException(
+                    "Nội dung phản hồi không được để trống"
+            );
+        }
+
+        if (resolved) {
+            throw new IllegalStateException(
+                    "Yêu cầu hỗ trợ đã được giải quyết"
+            );
+        }
+
+        this.adminReply = adminReply.trim();
         this.repliedAt = LocalDateTime.now();
-        this.status = "RESPONDED";
+        this.status = STATUS_RESPONDED;
         this.resolved = true;
     }
 }

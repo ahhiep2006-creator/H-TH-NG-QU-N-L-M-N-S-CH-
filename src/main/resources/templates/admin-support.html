@@ -1,68 +1,184 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Hỗ trợ sinh viên | Library Admin</title>
     <link rel="stylesheet" th:href="@{/css/library.css}">
+    <style>
+        .support-admin-page { max-width: 1200px; margin: 30px auto; padding: 20px; }
+        .support-admin-heading { margin-bottom: 24px; }
+        .support-admin-summary { display: flex; gap: 16px; flex-wrap: wrap; margin: 20px 0; }
+        .support-summary-card { padding: 20px; border-radius: 12px; background: #f3f5f8; min-width: 180px; }
+        .support-feedback-card { border: 1px solid #ddd; border-radius: 12px; padding: 20px; margin: 18px 0; background: white; }
+        .support-feedback-topline { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+        .support-feedback-meta { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+        .support-feedback-message { white-space: pre-wrap; overflow-wrap: anywhere; margin: 20px 0; }
+        .status-pill { padding: 6px 12px; border-radius: 20px; background: #eee; }
+        .status-new { background: #fff0ce; }
+        .status-progress { background: #dcecff; }
+        .status-resolved { background: #d9f5e3; }
+        .admin-reply-preview { background: #f1f8f3; padding: 14px; border-radius: 8px; margin: 15px 0; }
+        .admin-reply-form { margin-top: 18px; }
+        .admin-reply-form textarea { width: 100%; min-height: 100px; padding: 12px; }
+        .support-search { margin: 20px 0; }
+        .support-search input { width: 100%; max-width: 450px; padding: 12px; }
+        .support-actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 12px; }
+        .support-actions button { padding: 9px 16px; cursor: pointer; }
+        .support-feedback-card[hidden] { display: none; }
+        .support-search-empty { padding: 20px; text-align: center; }
+        .support-admin-alert { padding: 12px; margin: 12px 0; border-radius: 8px; }
+        .support-admin-alert.success { background: #e1f5e7; }
+        .support-admin-alert.error { background: #ffe5e5; }
+        @media (max-width: 600px) {
+            .support-admin-page { padding: 12px; }
+            .support-feedback-card { padding: 14px; }
+        }
+    </style>
 </head>
 <body>
 <div th:replace="~{fragments :: navbar}"></div>
-<main class="admin-dashboard-layout">
-    <aside class="admin-sidebar">
-        <a class="admin-nav-item" th:href="@{/admin/statistics}"><span>📈</span><span>Thống kê</span></a>
-        <a class="admin-nav-item" th:href="@{/admin/books}"><span>📖</span><span>Quản lý sách</span></a>
-        <a class="admin-nav-item" th:href="@{/tickets}"><span>📑</span><span>Quản lý mượn sách</span></a>
-        <a class="admin-nav-item" th:href="@{/readers}"><span>👤</span><span>Quản lý người dùng</span></a>
-        <a class="admin-nav-item active" th:href="@{/admin/support}"><span>💬</span><span>Hỗ trợ sinh viên</span></a>
-    </aside>
-    <section class="admin-main-panel support-admin-panel">
-        <div class="admin-panel-topbar support-admin-heading">
-            <div><span class="support-eyebrow">TRUNG TÂM HỖ TRỢ</span><h1>Phản hồi từ sinh viên</h1><p>Theo dõi và xử lý các yêu cầu gửi từ trang hỗ trợ.</p></div>
-            <a class="btn-table-revert" th:href="@{/contact}">Xem trang hỗ trợ ↗</a>
+
+<main class="support-admin-page">
+    <header class="support-admin-heading">
+        <h1>Quản lý hỗ trợ sinh viên</h1>
+        <p>Theo dõi và xử lý các yêu cầu hỗ trợ từ sinh viên.</p>
+    </header>
+
+    <div th:if="${successMessage}" class="support-admin-alert success"
+         role="status" th:text="${successMessage}"></div>
+    <div th:if="${errorMessage}" class="support-admin-alert error"
+         role="alert" th:text="${errorMessage}"></div>
+
+    <nav class="admin-sidebar">
+        <a class="admin-nav-item" th:href="@{/admin/statistics}">Thống kê</a>
+        <a class="admin-nav-item" th:href="@{/admin/books}">Quản lý sách</a>
+        <a class="admin-nav-item" th:href="@{/tickets}">Quản lý mượn sách</a>
+        <a class="admin-nav-item" th:href="@{/readers}">Quản lý độc giả</a>
+        <a class="admin-nav-item" th:href="@{/admin/support}">Hỗ trợ sinh viên</a>
+    </nav>
+
+    <section class="support-admin-summary">
+        <article class="support-summary-card">
+            <strong>Chưa xử lý</strong>
+            <h2 th:text="${openFeedbackCount}">0</h2>
+        </article>
+        <article class="support-summary-card">
+            <strong>Đã xử lý</strong>
+            <h2 th:text="${resolvedFeedbackCount}">0</h2>
+        </article>
+    </section>
+
+    <section>
+        <div>
+            <h2>Danh sách yêu cầu hỗ trợ</h2>
+            <p>Các yêu cầu mới nhất được hiển thị trước.</p>
         </div>
-        <div class="alert-notice alert-success" role="status" th:if="${successMessage}" th:text="${successMessage}"></div>
-        <div class="alert-notice alert-error" role="alert" th:if="${errorMessage}" th:text="${errorMessage}"></div>
-        <div class="support-summary-grid">
-            <article class="support-summary-card"><span class="support-summary-icon">📨</span><div><small>Tổng yêu cầu</small><strong th:text="${#lists.size(feedbackItems)}">0</strong></div></article>
-            <article class="support-summary-card support-summary-open"><span class="support-summary-icon">⏳</span><div><small>Chưa xử lý</small><strong th:text="${openFeedbackCount}">0</strong></div></article>
-            <article class="support-summary-card support-summary-done"><span class="support-summary-icon">✓</span><div><small>Đã xử lý</small><strong th:text="${resolvedFeedbackCount}">0</strong></div></article>
+
+        <div class="support-search">
+            <label for="feedbackSearch">Tìm kiếm yêu cầu</label>
+            <input id="feedbackSearch" type="search"
+                   placeholder="Nhập tên, email, chủ đề hoặc nội dung..."
+                   oninput="filterFeedback()">
         </div>
-        <div class="support-list-toolbar">
-            <div><h2>Hộp thư hỗ trợ</h2><p>Mới nhất được hiển thị trước</p></div>
-            <label class="support-search"><span aria-hidden="true">⌕</span><input id="feedbackSearch" type="search" placeholder="Tìm tên, email, nội dung..." oninput="filterFeedback()"></label>
-        </div>
-        <div class="support-feedback-list" id="feedbackList" th:if="${!#lists.isEmpty(feedbackItems)}">
-            <article class="support-feedback-card" th:each="feedback : ${feedbackItems}" th:attr="data-search=${#strings.toLowerCase(feedback.studentName + ' ' + feedback.email + ' ' + feedback.category + ' ' + feedback.message)}">
+
+        <div id="feedbackList"
+             th:if="${feedbackItems != null and !#lists.isEmpty(feedbackItems)}">
+
+            <article class="support-feedback-card"
+                     th:each="feedback : ${feedbackItems}"
+                     th:attr="data-search=${#strings.toLowerCase(feedback.studentName + ' ' + feedback.email + ' ' + feedback.category + ' ' + feedback.message)}">
+
                 <div class="support-feedback-topline">
-                    <div class="support-sender"><span class="support-sender-avatar" th:text="${#strings.substring(feedback.studentName,0,1)}">A</span><div><h3 th:text="${feedback.studentName}">Tên sinh viên</h3><a th:href="|mailto:${feedback.email}|" th:text="${feedback.email}">student@phenikaa-uni.edu.vn</a></div></div>
-                    <div class="support-feedback-meta"><span class="support-category" th:text="${feedback.category}">Chủ đề</span><time th:text="${feedback.createdAtFormatted}">19/10/2026 10:30</time><span class="status-pill" th:classappend="${feedback.status == 'RESPONDED'} ? ' status-resolved' : ' status-new'" th:text="${feedback.statusLabel}">Đã tiếp nhận</span></div>
+                    <div>
+                        <h3 th:text="${feedback.studentName}">Tên sinh viên</h3>
+                        <a th:href="|mailto:${feedback.email}|"
+                           th:text="${feedback.email}">student@example.com</a>
+                    </div>
+
+                    <div class="support-feedback-meta">
+                        <span th:text="${feedback.category}">Chủ đề</span>
+                        <time th:text="${feedback.createdAtFormatted}">19/11/2026</time>
+                        <span class="status-pill"
+                              th:classappend="${feedback.status == 'RESPONDED'} ? ' status-resolved' : (${feedback.status == 'IN_PROGRESS'} ? ' status-progress' : ' status-new')"
+                              th:text="${feedback.statusLabel}">Đã tiếp nhận</span>
+                    </div>
                 </div>
-                <p class="support-feedback-message" th:text="${feedback.message}">Nội dung phản hồi</p>
-                <div class="admin-reply-preview" th:if="${feedback.adminReply != null and !feedback.adminReply.isBlank()}"><strong>Phản hồi đã gửi</strong><p th:text="${feedback.adminReply}">Nội dung trả lời</p><small th:text="${feedback.repliedAtFormatted}">Thời gian phản hồi</small></div>
-                <div class="support-feedback-actions">
-                    <form class="admin-reply-form" th:if="${feedback.status != 'RESPONDED'}" th:action="@{/admin/support/{id}/reply(id=${feedback.id})}" method="post"><input type="hidden" name="csrfToken" th:value="${csrfToken}"><label th:for="|reply-${feedback.id}|">Trả lời sinh viên</label><textarea name="reply" th:id="|reply-${feedback.id}|" maxlength="3000" placeholder="Viết nội dung phản hồi sẽ hiển thị trong tài khoản sinh viên..." required></textarea><div class="admin-reply-form-bottom"><small>Nội dung sẽ xuất hiện trong mục Hỗ trợ của sinh viên.</small><button class="btn-support-resolve" type="submit">Gửi phản hồi ↗</button></div></form>
-                    <form class="admin-progress-form" th:if="${feedback.status == 'NEW'}" th:action="@{/admin/support/{id}/progress(id=${feedback.id})}" method="post"><input type="hidden" name="csrfToken" th:value="${csrfToken}"><button class="btn-table-revert" type="submit">Đánh dấu đang xử lý</button></form>
+
+                <div class="support-feedback-message"
+                     th:text="${feedback.message}">Nội dung yêu cầu</div>
+
+                <div class="admin-reply-preview"
+                     th:if="${feedback.adminReply != null and !#strings.isEmpty(feedback.adminReply)}">
+                    <strong>Phản hồi của quản trị viên</strong>
+                    <p th:text="${feedback.adminReply}">Nội dung phản hồi</p>
+                    <small>
+                        Thời gian phản hồi:
+                        <span th:text="${feedback.repliedAtFormatted}"></span>
+                    </small>
                 </div>
+
+                <div class="support-actions"
+                     th:if="${feedback.status != 'RESPONDED'}">
+                    <form th:if="${feedback.status != 'IN_PROGRESS'}"
+                          th:action="@{/admin/support/{id}/progress(id=${feedback.id})}"
+                          method="post">
+                        <input type="hidden" name="csrfToken" th:value="${csrfToken}">
+                        <button type="submit">Chuyển sang đang xử lý</button>
+                    </form>
+                </div>
+
+                <form class="admin-reply-form"
+                      th:if="${feedback.status != 'RESPONDED'}"
+                      th:action="@{/admin/support/{id}/reply(id=${feedback.id})}"
+                      method="post">
+                    <input type="hidden" name="csrfToken" th:value="${csrfToken}">
+
+                    <label th:for="|reply-${feedback.id}|">Nội dung phản hồi</label>
+                    <textarea th:id="|reply-${feedback.id}|"
+                              name="reply"
+                              maxlength="3000"
+                              placeholder="Nhập nội dung phản hồi cho sinh viên..."
+                              required></textarea>
+
+                    <button type="submit">Gửi phản hồi</button>
+                </form>
             </article>
-            <p class="support-search-empty" id="feedbackSearchEmpty" hidden>Không tìm thấy phản hồi phù hợp.</p>
+
+            <p class="support-search-empty" id="feedbackSearchEmpty" hidden>
+                Không tìm thấy yêu cầu phù hợp.
+            </p>
         </div>
-        <div class="support-empty-state" th:if="${#lists.isEmpty(feedbackItems)}"><span>✉️</span><h3>Hộp thư đang trống</h3><p>Khi sinh viên gửi yêu cầu qua trang hỗ trợ, phản hồi sẽ xuất hiện tại đây.</p><a class="btn-nav-register" th:href="@{/contact}">Mở trang hỗ trợ</a></div>
+
+        <div class="support-empty-state"
+             th:if="${feedbackItems == null or #lists.isEmpty(feedbackItems)}">
+            <h3>Hộp thư đang trống</h3>
+            <p>Hiện chưa có yêu cầu hỗ trợ nào từ sinh viên.</p>
+            <a th:href="@{/contact}">Mở trang hỗ trợ</a>
+        </div>
     </section>
 </main>
+
 <div th:replace="~{fragments :: footer}"></div>
+
 <script>
 function filterFeedback() {
-    const query = document.getElementById('feedbackSearch').value.trim().toLowerCase();
+    const input = document.getElementById('feedbackSearch');
+    const query = input.value.trim().toLowerCase();
     const cards = document.querySelectorAll('.support-feedback-card');
     let visible = 0;
+
     cards.forEach(card => {
-        const matches = (card.dataset.search || '').includes(query);
+        const content = card.dataset.search || '';
+        const matches = content.includes(query);
         card.hidden = !matches;
         if (matches) visible++;
     });
+
     const empty = document.getElementById('feedbackSearchEmpty');
-    if (empty) empty.hidden = visible > 0;
+    if (empty) {
+        empty.hidden = visible !== 0;
+    }
 }
 </script>
 </body>
