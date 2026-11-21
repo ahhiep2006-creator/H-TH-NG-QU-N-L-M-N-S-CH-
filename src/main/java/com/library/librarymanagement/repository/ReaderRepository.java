@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface ReaderRepository extends JpaRepository<Reader, String> {
@@ -14,4 +15,7 @@ public interface ReaderRepository extends JpaRepository<Reader, String> {
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("select reader from Reader reader where reader.id = :id")
     Optional<Reader> findByIdForUpdate(@Param("id") String id);
+
+    // Tìm theo mã hoặc họ tên (không phân biệt hoa thường)
+    List<Reader> findByIdContainingIgnoreCaseOrFullNameContainingIgnoreCase(String id, String fullName);
 }

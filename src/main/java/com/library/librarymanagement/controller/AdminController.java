@@ -123,6 +123,9 @@ public class AdminController {
                 form.getQuantity(),
                 form.getValue()
         );
+        if (form.getImageUrl() != null) {
+            book.setImageUrl(form.getImageUrl());
+        }
         bookRepository.save(book);
         redirectAttributes.addFlashAttribute("successMessage", "Đã thêm sách vào kho.");
         return "redirect:/admin/books";

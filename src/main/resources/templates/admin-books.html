@@ -60,6 +60,12 @@
                 <small style="color:#ef4444; font-size:12px;" th:if="${#fields.hasErrors('title')}" th:errors="*{title}"></small>
             </div>
 
+            <div class="form-group">
+                <label for="imageUrl">Đường dẫn ảnh bìa sách</label>
+                <input id="imageUrl" type="url" class="form-control-input" th:field="*{imageUrl}" placeholder="https://..." maxlength="500">
+                <small style="color:#ef4444; font-size:12px;" th:if="${#fields.hasErrors('imageUrl')}" th:errors="*{imageUrl}"></small>
+            </div>
+
             <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
                 <div class="form-group">
                     <label for="author">Tác giả *</label>
