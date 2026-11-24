@@ -1,7 +1,10 @@
 package com.library.librarymanagement.controller;
 
 import com.library.librarymanagement.model.Book;
+import com.library.librarymanagement.model.BorrowTicketDetail;
 import com.library.librarymanagement.repository.BookRepository;
+import com.library.librarymanagement.repository.BorrowTicketRepository;
+import com.library.librarymanagement.repository.BorrowTicketDetailRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
@@ -17,6 +20,11 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @Controller
@@ -26,14 +34,20 @@ public class AdminController {
     private static final String CSRF_SESSION_ATTRIBUTE = "adminCsrfToken";
 
     private final BookRepository bookRepository;
+    private final BorrowTicketRepository borrowTicketRepository;
+    private final BorrowTicketDetailRepository borrowTicketDetailRepository;
     private final String adminUsername;
     private final String adminPassword;
 
     public AdminController(
             BookRepository bookRepository,
+            BorrowTicketRepository borrowTicketRepository,
+            BorrowTicketDetailRepository borrowTicketDetailRepository,
             @Value("${library.admin.username:24100072@st.phenikaa-uni.edu.vn}") String adminUsername,
             @Value("${library.admin.password:admin}") String adminPassword) {
         this.bookRepository = bookRepository;
+        this.borrowTicketRepository = borrowTicketRepository;
+        this.borrowTicketDetailRepository = borrowTicketDetailRepository;
         this.adminUsername = adminUsername == null || adminUsername.isBlank() ? "24100072@st.phenikaa-uni.edu.vn" : adminUsername;
         this.adminPassword = adminPassword == null || adminPassword.isBlank() ? "admin" : adminPassword;
     }
@@ -72,6 +86,79 @@ public class AdminController {
         session.setAttribute(ADMIN_SESSION_ATTRIBUTE, true);
         session.setAttribute(CSRF_SESSION_ATTRIBUTE, UUID.randomUUID().toString());
         return "redirect:/";
+    }
+
+    @GetMapping("/admin/statistics")
+    public String statistics(HttpSession session, Model model) {
+        if (!isAdmin(session)) {
+            return "redirect:/admin/login";
+        }
+
+        List<BorrowTicketDetail> details = borrowTicketDetailRepository.findAll();
+        Map<String, Integer> borrowCounts = new HashMap<>();
+        int totalBorrowedCopies = 0;
+
+        for (BorrowTicketDetail detail : details) {
+            if (detail.getBook() == null) {
+                continue;
+            }
+
+            String bookId = detail.getBook().getId();
+            int quantity = detail.getQuantity();
+
+            borrowCounts.put(
+                    bookId,
+                    borrowCounts.getOrDefault(bookId, 0) + quantity
+            );
+            totalBorrowedCopies += quantity;
+        }
+
+        List<Book> books = bookRepository.findAll();
+
+        int maximumBorrowCount = books.stream()
+                .mapToInt(book -> borrowCounts.getOrDefault(book.getId(), 0))
+                .max()
+                .orElse(0);
+
+        List<Map<String, Object>> bookStatistics = new ArrayList<>();
+
+        books.stream()
+                .sorted(Comparator.comparingInt(
+                        (Book book) -> borrowCounts.getOrDefault(book.getId(), 0)
+                ).reversed().thenComparing(Book::getTitle))
+                .forEach(book -> {
+                    int count = borrowCounts.getOrDefault(book.getId(), 0);
+
+                    Map<String, Object> statistic = new HashMap<>();
+                    statistic.put("book", book);
+                    statistic.put("borrowCount", count);
+                    statistic.put(
+                            "percent",
+                            maximumBorrowCount == 0 ? 0 : count * 100 / maximumBorrowCount
+                    );
+
+                    bookStatistics.add(statistic);
+                });
+
+        long borrowingCount = borrowTicketRepository.countByStatus("BORROWING");
+        long returnedCount = borrowTicketRepository.countByStatus("RETURNED");
+        long trackedTicketCount = borrowingCount + returnedCount;
+
+        int returnedPercentage = trackedTicketCount == 0
+                ? 0 : (int) (returnedCount * 100 / trackedTicketCount);
+
+        model.addAttribute("bookStatistics", bookStatistics);
+        model.addAttribute("totalBorrowedCopies", totalBorrowedCopies);
+        model.addAttribute("borrowingCount", borrowingCount);
+        model.addAttribute("returnedCount", returnedCount);
+        model.addAttribute("totalTicketCount", borrowTicketRepository.count());
+        model.addAttribute("returnedPercentage", returnedPercentage);
+        model.addAttribute(
+                "borrowingPercentage",
+                trackedTicketCount == 0 ? 0 : 100 - returnedPercentage
+        );
+
+        return "admin-statistics";
     }
 
     @GetMapping("/admin/books")
